@@ -1,0 +1,24 @@
+{
+    "browser": true,
+
+    "asi": true,
+
+    "predef": {
+        "KISSY": true,
+
+        // qunit
+        "QUnit": true,
+        "module": true,
+        "test": true,
+        "asyncTest": true,
+        "start": true,
+        "stop": true,
+        "ok": true,
+        "equal": true,
+        "deepEqual": true,
+        "strictEqual": true,
+        "notEqual": true,
+        "notDeepEqual": true,
+        "notStrictEqual": true
+    }
+}
