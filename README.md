@@ -19,8 +19,15 @@ Brix 的核心功能，包括：
 
 ```js
 KISSY.use('shopping-ads/ceiling', function(S, Ceiling) {
-    // el       [bx-name="shopping-ads/ceiling"] 节点
-    new Ceiling(el)
+    // 参数结构如下：
+    //
+    // - el           [bx-name="shopping-ads/ceiling"] 节点
+    // - customProp   el 节点上的 data-customProp 值
+    //
+    new Ceiling({
+        el: el,
+        // ... 自定义的参数，参数列表通过 Ceiling.OPTIONS 定义
+    })
 })
 ```
 
