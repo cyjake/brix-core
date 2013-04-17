@@ -12,11 +12,6 @@ KISSY.add('brix/core/bx-name', function(S, Node) {
             var self = this
             var node
 
-            if (total === 0) {
-                this.fire('bx:ready')
-                return
-            }
-
             function check() {
                 counter++
                 if (total === 0 || counter === total) {
@@ -25,10 +20,17 @@ KISSY.add('brix/core/bx-name', function(S, Node) {
                 }
             }
 
-            for (var i = 0; i < total; i++) {
-                node = Node(nodes[i])
+            if (total === 0) {
+                setTimeout(function() {
+                    self.fire('bx:ready')
+                }, 0)
+            }
+            else {
+                for (var i = 0; i < total; i++) {
+                    node = Node(nodes[i])
 
-                this.bxInstantiate(node, check)
+                    this.bxInstantiate(node, check)
+                }
             }
         },
 

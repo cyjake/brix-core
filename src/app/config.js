@@ -1,4 +1,4 @@
-KISSY.add('brix/core/app-config', function(S) {
+KISSY.add('brix/app/config', function(S) {
 
     var exports = {
         configData: {

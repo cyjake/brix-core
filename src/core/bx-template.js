@@ -74,7 +74,7 @@ KISSY.add('brix/core/bx-template', function(S, app) {
     return exports
 }, {
     requires: [
-        'brix/core/app-config',
+        'brix/app/config',
         'node',
         'ajax',
         'sizzle'

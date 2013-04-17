@@ -25,13 +25,13 @@ KISSY.use('base, brix/core/bx-template, brix/app',
     })
 
     asyncTest('#bxHereTemplate', function() {
-        foo.bxTemplate(S.one('[bx-name="shopping-ads/ceiling"]'))
+        foo.bxTemplate(S.one('[bx-name="ux.shopping-ads/ceiling"]'))
         ok(S.Node(foo.get('template')).one('a'))
         start()
     })
 
     asyncTest('#bxScriptTemplate', function() {
-        foo.bxTemplate(S.one('[bx-name="diamond/sidenav"]'))
+        foo.bxTemplate(S.one('[bx-name="ux.diamond/sidenav"]'))
         ok(S.Node(foo.get('template')).hasClass('diamond-sidenav'))
         start()
     })
@@ -41,7 +41,7 @@ KISSY.use('base, brix/core/bx-template, brix/app',
         app.config('debug', false)
         app.config('base', '../')
         app.config('imports', {
-            tanx: {
+            'ux.tanx': {
                 dropdown: '0.1.5'
             }
         })
@@ -51,7 +51,7 @@ KISSY.use('base, brix/core/bx-template, brix/app',
             ok(S.Node(foo.get('template')).hasClass('tanx-dropdown'))
             start()
         })
-        foo.bxTemplate(S.one('[bx-name="tanx/dropdown"]'))
+        foo.bxTemplate(S.one('[bx-name="ux.tanx/dropdown"]'))
     })
 
     if (/^http:\/\//.test(location.href)) {
@@ -65,7 +65,7 @@ KISSY.use('base, brix/core/bx-template, brix/app',
                 ok(ele.all('[bx-repeat]').length > 0)
                 start()
             })
-            foo.bxTemplate(S.one('[bx-name="tanx/dropdown"]'))
+            foo.bxTemplate(S.one('[bx-name="ux.tanx/dropdown"]'))
         })
     }
 })

@@ -6,7 +6,7 @@ KISSY.config({
         }
     }
 })
-KISSY.use('brix/core/app-config', function(S, app) {
+KISSY.use('brix/app/config', function(S, app) {
     app.config({
         namespace: 'brix-test',
         components: [

@@ -89,7 +89,7 @@ KISSY.add('brix/base', function(S, bxName, bxTemplate, bxScope, bxDirective, app
         'brix/core/bx-template',
         'brix/core/bx-scope',
         'brix/core/bx-directive',
-        'brix/core/app-config',
+        'brix/app/config',
         'rich-base'
     ]
 })

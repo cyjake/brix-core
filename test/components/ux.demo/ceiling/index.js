@@ -1,4 +1,4 @@
-KISSY.add('brix-test/ceiling/index', function(S, SCeiling) {
+KISSY.add('ux.demo/ceiling/index', function(S, SCeiling) {
 
     function Ceiling(opts) {
         Ceiling.superclass.constructor.call(this, opts)
@@ -9,5 +9,5 @@ KISSY.add('brix-test/ceiling/index', function(S, SCeiling) {
     return Ceiling
 
 }, {
-    requires: ['shopping-ads/ceiling/index']
+    requires: ['ux.shopping-ads/ceiling/index']
 })

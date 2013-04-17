@@ -10,27 +10,24 @@ KISSY.config({
 KISSY.use('brix/app', function(S, app) {
     app.config({
         base: '../../../',
-        namespace: 'brix-test'
+        namespace: 'ux.demo'
     })
 
     app.config('imports', {
-        'shopping-ads': {
+        'ux.shopping-ads': {
             ceiling: '0.1.1'
         }
     })
 
-    app.set('data', {
-        ceiling: {
-            user: {
-                name: '逸才',
-                email: 'yicai.cyj@taobao.com'
-            }
-        }
-    })
-
     asyncTest('inherit', function() {
-        app.boot()
-        app.on('bx:ready', function() {
+        app.boot({
+            ceiling: {
+                user: {
+                    name: '逸才',
+                    email: 'yicai.cyj@taobao.com'
+                }
+            }
+        }).on('bx:ready', function() {
             start()
         })
     })

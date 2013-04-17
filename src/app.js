@@ -1,4 +1,4 @@
-KISSY.add('brix/app', function(S, bxName, bxScope, appConfig) {
+KISSY.add('brix/app', function(S, BxPage, appConfig) {
 
     function BxApp() {
         BxApp.superclass.constructor.call(this)
@@ -7,43 +7,30 @@ KISSY.add('brix/app', function(S, bxName, bxScope, appConfig) {
     S.extend(BxApp, S.Base)
 
     BxApp.ATTRS = {
-        data: null,
-
-        prepared: false,
-
-        el: {
-            getter: function(elId) {
-                return elId && S.one(elId)
-            },
-            setter: function(el) {
-                if (el) {
-                    if (!el.attr('id')) {
-                        el.attr('id', 'bx-app')
-                    }
-                    return '#' + el.attr('id')
-                }
-            }
-        }
+        prepared: false
     }
 
-    S.augment(BxApp, bxName, bxScope, appConfig, {
-        boot: function(el) {
+    S.augment(BxApp, appConfig, {
+        boot: function(el, data) {
             this.prepareLoader()
 
+            if (S.isPlainObject(el)) {
+                data = el
+                el = '[bx-app]'
+            }
             el = el || '[bx-app]'
-            if (S.isString(el)) {
-                el = S.one(el)
-            }
+            el = S.isString(el) ? S.one(el) : el
+
             if (el) {
-                this.set('el', el)
+                var page = new BxPage({
+                    el: el,
+                    data: data
+                })
+
+                page.bxLoad(el)
+
+                return page
             }
-
-            this.bxLoad(el)
-        },
-
-        reload: function() {
-            this.bxChildren = []
-            this.detach('bx:ready')
         },
 
         bootStyle: function(fn) {
@@ -68,9 +55,8 @@ KISSY.add('brix/app', function(S, bxName, bxScope, appConfig) {
     return app
 }, {
     requires: [
-        'brix/core/bx-name',
-        'brix/core/bx-scope',
-        'brix/core/app-config',
+        'brix/app/page',
+        'brix/app/config',
         'base'
     ]
 })

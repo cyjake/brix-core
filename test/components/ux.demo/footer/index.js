@@ -1,4 +1,4 @@
-KISSY.add('brix-test/footer/index', function(S, BxBase) {
+KISSY.add('ux.demo/footer/index', function(S, BxBase) {
 
     function Footer(opts) {
         Footer.superclass.constructor.call(this, opts)

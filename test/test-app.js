@@ -8,20 +8,18 @@ KISSY.config({
 })
 
 KISSY.use('brix/app', function(S, app) {
-    app.config('namespace', 'brix-test')
+    app.config('namespace', 'ux.demo')
     app.config('imports', {
-        'shopping-ads': {
+        'ux.shopping-ads': {
             ceiling: '0.1.0'
         },
-        'tanx': {
+        'ux.tanx': {
             dropdown: '0.1.5'
         }
     })
 
-    app.boot()
-
     asyncTest('#boot app', function() {
-        app.on('bx:ready', function() {
+        app.boot().on('bx:ready', function() {
             start()
         })
     })
