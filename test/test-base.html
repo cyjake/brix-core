@@ -10,7 +10,7 @@
   <div id="qunit-fixture"></div>
   <div id="fixture1">
     <div bx-name="ux.shopping-ads/ceiling" bx-template="." bx-scope="ceiling">
-      {{#with ceiling.user}}<h1><a href="mailto:{{email}}">{{name}}</a></h1>{{/with}}
+      <h1><a href="mailto:{{user.email}}">{{user.name}}</a></h1>
     </div>
   </div>
   <div id="fixture2">

@@ -62,7 +62,7 @@ KISSY.use('base, brix/core/bx-template, brix/app',
                 var ele = S.Node(foo.get('template'))
 
                 ok(ele.hasClass('tanx-dropdown'))
-                ok(ele.all('[bx-repeat]').length > 0)
+                equal(ele.all('[bx-each]').length, 1)
                 start()
             })
             foo.bxTemplate(S.one('[bx-name="ux.tanx/dropdown"]'))

@@ -1,0 +1,35 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>局部刷新</title>
+</head>
+<body bx-app>
+<div bx-name="ux.demo/grid" bx-scope="gridData" bx-template=".">
+  <table>
+    <thead>
+      <tr>
+        <th>花名</th>
+        <th>微博</th>
+        <th>主页</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr bx-each="employees">
+        <td>{{nickname}}</td>
+        <td><a href="{{weiboLink}}">@{{weiboAt}}</a></td>
+        <td><a href="{{pageLink}}">{{pageTitle}}</a></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<div bx-name="ux.demo/panel" bx-scope="panelData" bx-template=".">
+  <!-- 应该 fork KISSY 的 xtemplate ，使其支持 lt, gt, eq 这种写法，这样就可以放心地内联模板了 -->
+  <button class="J_prevBtn" bx-disabled="page < 1">上一组</button>
+  <button class="J_nextBtn" bx-disabled="page === pages - 1">下一组</button>
+</div>
+<script src="http://a.tbcdn.cn/s/kissy/1.3.0/seed.js"></script>
+<script src="../../build/brix-0.1.0.js"></script>
+<script src="partial.js"></script>
+</body>
+</html>

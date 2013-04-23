@@ -14,16 +14,19 @@ KISSY.use('brix/app', function(S, app) {
     })
     app.config('imports', {
         'ux.tanx': {
-            message: '0.1.2'
+            grid: '0.2.1'
         }
     })
 
-    asyncTest('#bxIfElse', function() {
+    asyncTest('@bx-each', function() {
         app.boot({
-            messages: {
-                error: {
-                    message: '最近风声紧，低调。'
-                }
+            gridData: {
+                headFields: 'id name email weibo'.split(' '),
+                rowsData: [
+                    '1 逸才 yicai.cyj@taobao.com 逸才很茫然'.split(' '),
+                    '2 左莫 zuomo.xb@taobao.com 左莫莫右莫莫'.split(' '),
+                    '3 李牧 limu@taobao.com lenel'.split(' ')
+                ]
             }
         }).on('bx:ready', function() {
             start()

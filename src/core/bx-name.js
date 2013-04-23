@@ -6,7 +6,7 @@ KISSY.add('brix/core/bx-name', function(S, Node) {
         // So let's use #bxLoad instead.
         bxLoad: function(root) {
             root = Node(root)
-            var nodes = this.bxChildElements(root)
+            var nodes = this.bxDirectChildren(root)
             var total = nodes.length
             var counter = 0
             var self = this
@@ -66,11 +66,30 @@ KISSY.add('brix/core/bx-name', function(S, Node) {
             })
         },
 
-        bxChildElements: function(root) {
+        /**
+         * Get child elements of current node which may or may not have
+         * attribute bx-name.
+         *
+         * Given DOM structures like:
+         *
+         *     <div bx-name="foo/egg" bx-scope="cart">
+         *       <div bx-each="item in items"></div>
+         *       <div bx-name="foo/ham" bx-scope="item">
+         *         <div bx-each="attr in attributes"></div>
+         *       </div>
+         *     </div>
+         *
+         * this.bxDirectChildren(S.one('[bx-name="foo/egg"]'), '[bx-each]')
+         * should return an array consists of one element:
+         *
+         *     <div bx-each="item in items"></div>
+         */
+        bxDirectChildren: function(root, selector) {
             var arr = []
             var parentName = root.attr('bx-name')
 
-            root.all('[bx-name]').each(function(ele) {
+            selector = selector || '[bx-name]'
+            root.all(selector).each(function(ele) {
                 var parent = ele.parent('[bx-name]')
 
                 if (!parent || parent.attr('bx-name') === parentName) {

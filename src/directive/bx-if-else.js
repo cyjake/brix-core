@@ -1,41 +1,33 @@
 KISSY.add('brix/directive/bx-if-else', function(S) {
 
     var exports = {
-        bxIfElse: function(node, data) {
-            var NodeList = S.NodeList
-            var ifs = this.bxDirectSiblings(node, 'bx-if')
+        bxIfElse: function(node) {
+            var ifs = this.bxDirectDirective(node, 'bx-if')
+            var DOM = S.DOM
 
             for (var i = 0; i < ifs.length; i++) {
                 var positive = ifs[i]
                 var negative = positive.next()
 
-                console.log(negative.outerHTML(), negative.hasAttr('bx-else'))
                 if (negative && !negative.hasAttr('bx-else')) {
                     negative = null
                 }
-                var cond = positive.attr('bx-if')
+                var ifSymbole = document.createTextNode('{{#if ' + positive.attr('bx-if') + '}}')
+                var endSymbole = document.createTextNode('{{/if}}')
 
-                positive.removeAttr('bx-if')
-                if (data[cond]) {
-                    NodeList(this.bxDirective(positive.html(), data)).insertBefore(positive)
+                DOM.insertBefore(ifSymbole, positive)
+                if (negative) {
+                    var elseSymbole = document.createTextNode('{{else}}')
+
+                    DOM.insertBefore(elseSymbole, negative)
+                    DOM.insertAfter(endSymbole, negative)
                 }
                 else {
-                    if (negative) {
-                        negative.removeAttr('bx-else')
-                        NodeList(this.bxDirective(negative.html(), data)).insertBefore(negative)
-                    }
+                    DOM.insertAfter(endSymbole, positive)
                 }
-                if (negative) {
-                    negative.remove()
-                }
-                positive.remove()
             }
         }
     }
 
     return exports
-}, {
-    requires: [
-        'node'
-    ]
 })

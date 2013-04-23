@@ -1,39 +1,53 @@
-KISSY.add('brix/core/bx-directive', function(S, bxIfElse, bxRepeat, XTemplate) {
+KISSY.add('brix/core/bx-directive',
+          function(S, bxIfElse, bxEach, bxBoolean, bxSrc, XTemplate) {
 
     var exports = {
         bxDirective: function(template, data) {
-            var div = S.Node('<div>', {
-                html: template
+            var Node = S.Node
+            var div
+            var templateCache = this.get('templateCache')
+
+            if (!templateCache) {
+                div = Node('<div>', {
+                    html: template
+                })
+
+                this.bxIfElse(div)
+                this.bxEach(div)
+                this.bxBoolean(div)
+
+                template = this.bxUnsealOperators(div.html())
+                templateCache = new XTemplate(template)
+
+                this.set('templateCache', templateCache)
+            }
+            div = Node('<div>', {
+                html: templateCache.render(data)
             })
 
-            this.bxIfElse(div, data)
-            this.bxRepeat(div, data)
+            this.bxBooleanStrip(div)
+            this.bxSrcStrip(div)
 
-            return new XTemplate(div.html()).render(data)
+            return div.html()
         },
 
-        bxDirectSiblings: function(root, attr) {
-            var arr = []
-            var selectors = '[bx-name], [bx-if], [bx-else], [bx-repeat]'
-
-            root.all('[' + attr + ']').each(function(ele) {
-                if (!ele.parent(selectors)) {
-                    arr.push(ele)
-                }
-            })
-
-            return arr
+        bxDirectDirective: function(node, attr) {
+            return this.bxDirectChildren(node, '[' + attr + ']')
         }
     }
 
     S.mix(exports, bxIfElse)
-    S.mix(exports, bxRepeat)
+    S.mix(exports, bxEach)
+    S.mix(exports, bxBoolean)
+    S.mix(exports, bxSrc)
 
     return exports
 }, {
     requires: [
         'brix/directive/bx-if-else',
-        'brix/directive/bx-repeat',
+        'brix/directive/bx-each',
+        'brix/directive/bx-boolean',
+        'brix/directive/bx-src',
         'xtemplate',
         'node'
     ]

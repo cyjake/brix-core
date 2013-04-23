@@ -10,18 +10,18 @@ Brix 的核心功能，包括：
 通过 `[bx-name]` 钩子加载相应组件，支持嵌套。
 
 ```html
-<div bx-name="shopping-ads/ceiling">
+<div bx-name="ux.shopping-ads/ceiling">
   <!-- 节点内部 HTML -->
 </div>
 ```
 
-将会加载 `shopping-ads/ceiling` 模块，并传 el 给它，且初始化之，行为如下：
+将会加载 `ux.shopping-ads/ceiling/index` 模块，并传 el 给它，且初始化之，行为如下：
 
 ```js
-KISSY.use('shopping-ads/ceiling', function(S, Ceiling) {
+KISSY.use('ux.shopping-ads/ceiling/index', function(S, Ceiling) {
     // 参数结构如下：
     //
-    // - el           [bx-name="shopping-ads/ceiling"] 节点
+    // - el           [bx-name="ux.shopping-ads/ceiling"] 节点
     // - customProp   el 节点上的 data-customProp 值
     //
     new Ceiling({
@@ -37,13 +37,13 @@ KISSY.use('shopping-ads/ceiling', function(S, Ceiling) {
 
 ```bash
 test/imports
-├── shopping-ads
+├── ux.shopping-ads
 │   └── ceiling
 │       ├── 0.1.0
 │       │   └── index.js
 │       └── 0.1.1
 │           └── index.js
-└── tanx
+└── ux.tanx
     ├── dropdown
     │   └── 0.1.5
     │       ├── index.js
@@ -59,7 +59,7 @@ test/imports
 
 ```bash
 test/components
-└── brix-test
+└── ux.demo
     ├── ceiling
     │   ├── index.js
     │   ├── test-ceiling.html
@@ -71,7 +71,19 @@ test/components
 
 ### 初始化页面
 
+```js
+KISSY.use('brix/app', function(S, app) {
+    app.boot({
+        ceiling: {
+            user: 'foobar'
+        }
+    }).on('bx:ready', function(e) {
+        var ceiling = this.find('ux.demo/ceiling')
 
+        equal(ceiling.bxName, 'ux.demo/ceiling')
+    })
+})
+```
 
 ## 组件模板支持
 
@@ -86,31 +98,37 @@ Brix 的正式模板引擎仍然在开发中，在此之前，我们采用
 [xtemplate](http://docs.kissyui.com/docs/html/tutorials/kissy/component/xtemplate/intro.html)
 为基础模板，同时使用一些自定义标签，以便模板解析与加工。
 
+先讨论模板的放置方式，理想中，支持三种：
+
+- 组件节点中内联
+- 写在 `script[type="text/bx-template"]` 标签中
+- 模板文件自成模块
+
 ### 左莫的经验
 
 波哥在之前版本的实现中，在获取子模板时踩过许多坑，总结出不少经验，etaoux/brix#39 与
 etaoux/brix#41 。我不太认同深度依赖正则表达式的解决方案，更偏好类似 AngularJS 的方式，
 即将独立的 `{{}}` 标签从 HTML 中移出，改为标签上的自定义属性。
 
-然而这一块我还没考虑完全，示例也暂时欠奉，只完成了 @bx-repeat 之类，后补吧。
+然而这一块我还没考虑完全，直接在 HTML 元素的 innerHTML 里内联模板的主要问题有：
 
-先讨论模板的放置方式，理想中，支持三种：
+- `{{#if a > 0}}` 这种代码，里头的 `>` 会被转义成 `&gt;`
+- `<img src="{{imageLink}}"/>` 会导致请求 http://{{imageLink}} ，404
+- `<a href="{{pageLink"></a>` 会变成 http://brix.example.com/{{pageLink}}
 
-- 组件节点中内联
-- 写在 script[type="text/bx-template"] 标签中
-- 模板文件自成模块
+剩余的坑，遇到一个补充一个，这些问题，会总结成博文，到时一并发出来。
 
 ### 组件节点中内联
 
 直接在组件节点的 `innerHTML` 中写：
 
 ```html
-<div bx-name="shopping-ads/ceiling" bx-template=".">
+<div bx-name="ux.shopping-ads/ceiling" bx-template=".">
   <p class="user-info" bx-if="user">
-    <a href="{{user.link}}">{{user.nickname}}</a>
+    <a bx-href="{{user.link}}">{{user.nickname}}</a>
   </p>
   <p class="login" bx-else>
-    <a href="/login">请先登录</a>
+    <a bx-href="/login">请先登录</a>
   </p>
 </div>
 ```
@@ -124,7 +142,7 @@ etaoux/brix#41 。我不太认同深度依赖正则表达式的解决方案，�
 ### 写在页面 script 标签中
 
 ```html
-<div bx-name="shopping-ads/ceiling" bx-template="#ceiling-template">
+<div bx-name="ux.shopping-ads/ceiling" bx-template="#ceiling-template">
 </div>
 <script type="text/bx-template" id="ceiling-template">
   <p class="user-info" bx-if="user">
@@ -137,10 +155,10 @@ etaoux/brix#41 。我不太认同深度依赖正则表达式的解决方案，�
 
 ### 组件目录中的独立文件
 
-以 `shopping-ads/ceiling` 组件为例，它的目录结构如下：
+以 `ux.shopping-ads/ceiling` 组件为例，它的目录结构如下：
 
 ```bash
-shopping-ads/ceiling
+ux.shopping-ads/ceiling
 ├── data.json
 ├── index.js
 ├── index.css
@@ -149,7 +167,7 @@ shopping-ads/ceiling
 ```
 
 package.json、index.css 先不管，index.js 即此组件的入口文件，它需要提供
-`shopping-ads/ceiling/index` 模块。
+`ux.shopping-ads/ceiling/index` 模块。
 
 此节讨论的重点是 template.html 文件，此文件用于放置组件本身的模板，内容如下：
 
@@ -162,14 +180,11 @@ package.json、index.css 先不管，index.js 即此组件的入口文件，它�
 声明这种使用方式的方法是：
 
 ```html
-<div bx-name="shopping-ads/ceiling" bx-template="./template">
+<div bx-name="ux.shopping-ads/ceiling" bx-template="./template">
 </div>
 ```
 
 ## 模板写法
-
-这部分是私货，更容易引起口水，暂时按下不表。0.1.0 版本只实现了 @bx-scope @bx-repeat @bx-if
-和 @bx-else 。
 
 这种设计的目的是效仿 AngularJS，去除模板中的 `{{}}`，从而避免掉进一些坑里头去，例如：
 
@@ -211,13 +226,13 @@ package.json、index.css 先不管，index.js 即此组件的入口文件，它�
 {{/visible}}
 ```
 
-### bx-repeat
+### bx-each
 
 重复当前节点，同样类似 mustache 中的 `{{#array}} ... {{/array}}`` 语法：
 
 ```html
-<div bx-repeat="user in users">
-  <h2>{{user.name}}</h2>
+<div bx-each="users">
+  <h2>{{name}}</h2>
 </div>
 ```
 
@@ -231,18 +246,26 @@ package.json、index.css 先不管，index.js 即此组件的入口文件，它�
 {{/users}}
 ```
 
-### bx-readonly-if
+### bx-readonly
 
 方便在 `<input>` 标签中使用的语法糖
 
 ```html
-<input type="text" bx-readonly-if="user.isGuest"/>
+<input type="text" bx-readonly="guest"/>
 ```
 
-### bx-checked-if
+### bx-checked
+
+方便在 `<input type="checkbox">` 标签中使用的语法糖
+
+```html
+<input type="checkbox" bx-checked="selected"/>
+```
+
+### bx-disabled
 
 方便在 `<input>` 标签中使用的语法糖
 
 ```html
-<input type="checkbox" bx-checked-if="item.selected"/>
+<input type="text" bx-disabled="guest"/>
 ```

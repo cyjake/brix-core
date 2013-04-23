@@ -68,13 +68,14 @@ KISSY.add('brix/base', function(S, bxName, bxTemplate, bxScope, bxDirective, app
             var engine = app.config('templateEngine')
             var data = {}
             var res = null
+            var key = this.bxName.split('/').pop()
 
-            data[this.bxName.split('/').pop()] = this.get('data')
+            data[key] = this.get('data')
             if (engine && S.isFunction(engine.render)) {
                 res = engine.render(template, data)
             }
             else {
-                res = this.bxDirective(template, data)
+                res = this.bxDirective(template, data[key])
             }
             el.html(res)
 

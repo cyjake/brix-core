@@ -2,23 +2,23 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>@bx-repeat</title>
+  <title>@bx-each</title>
   <link rel="stylesheet" type="text/css" href="../qunit.css">
 </head>
 <body>
   <div id="qunit"></div>
   <div id="qunit-fixture"></div>
   <div id="fixture1" bx-app>
-    <div bx-name="tanx/grid" bx-template="." bx-scope="gridData">
+    <div bx-name="ux.tanx/grid" bx-template="." bx-scope="gridData">
       <table>
         <thead>
           <tr>
-            <th bx-repeat="field in headFields">{{field}}</th>
+            <th bx-each="headFields">{{.}}</th>
           </tr>
         </thead>
         <tbody>
-          <tr bx-repeat="row in rowsData">
-            <td bx-repeat="field in row">{{field}}</td>
+          <tr bx-each="rowsData">
+            <td bx-each="this">{{.}}</td>
           </tr>
         </tbody>
       </table>
@@ -26,6 +26,6 @@
   </div>
   <script src="../qunit.js"></script>
   <script src="http://a.tbcdn.cn/s/kissy/1.3.0/seed.js"></script>
-  <script src="test-bx-repeat.js"></script>
+  <script src="test-bx-each.js"></script>
 </body>
 </html>

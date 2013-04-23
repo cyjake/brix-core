@@ -3,7 +3,7 @@
  * 
  * http://github.com/brixjs
  */
-KISSY.add('brix/app', function(S, bxName, bxScope, appConfig) {
+KISSY.add('brix/app', function(S, BxPage, appConfig) {
 
     function BxApp() {
         BxApp.superclass.constructor.call(this)
@@ -12,43 +12,30 @@ KISSY.add('brix/app', function(S, bxName, bxScope, appConfig) {
     S.extend(BxApp, S.Base)
 
     BxApp.ATTRS = {
-        data: null,
-
-        prepared: false,
-
-        el: {
-            getter: function(elId) {
-                return elId && S.one(elId)
-            },
-            setter: function(el) {
-                if (el) {
-                    if (!el.attr('id')) {
-                        el.attr('id', 'bx-app')
-                    }
-                    return '#' + el.attr('id')
-                }
-            }
-        }
+        prepared: false
     }
 
-    S.augment(BxApp, bxName, bxScope, appConfig, {
-        boot: function(el) {
+    S.augment(BxApp, appConfig, {
+        boot: function(el, data) {
             this.prepareLoader()
 
+            if (S.isPlainObject(el)) {
+                data = el
+                el = '[bx-app]'
+            }
             el = el || '[bx-app]'
-            if (S.isString(el)) {
-                el = S.one(el)
-            }
+            el = S.isString(el) ? S.one(el) : el
+
             if (el) {
-                this.set('el', el)
+                var page = new BxPage({
+                    el: el,
+                    data: data
+                })
+
+                page.bxLoad(el)
+
+                return page
             }
-
-            this.bxLoad(el)
-        },
-
-        reload: function() {
-            this.bxChildren = []
-            this.detach('bx:ready')
         },
 
         bootStyle: function(fn) {
@@ -73,108 +60,12 @@ KISSY.add('brix/app', function(S, bxName, bxScope, appConfig) {
     return app
 }, {
     requires: [
-        'brix/core/bx-name',
-        'brix/core/bx-scope',
-        'brix/core/app-config',
+        'brix/app/page',
+        'brix/app/config',
         'base'
     ]
 });
-KISSY.add('brix/base', function(S, bxName, bxTemplate, bxScope, bxDirective, app, RichBase) {
-
-    function BxBase(opts) {
-        BxBase.superclass.constructor.call(this, opts)
-    }
-
-    BxBase.uid = function() {
-        return ['bx', S.guid()].join('-')
-    }
-
-    S.extend(BxBase, RichBase)
-
-    BxBase.ATTRS = {
-        data: null,
-
-        template: null,
-
-        el: {
-            getter: function(elId) {
-                return S.one(elId)
-            },
-            setter: function(el) {
-                if (!el.attr('id')) {
-                    el.attr('id', BxBase.uid())
-                }
-
-                return '#' + el.attr('id')
-            }
-        }
-    }
-
-    S.augment(BxBase, bxName, bxTemplate, bxScope, bxDirective, {
-        initialize: function(el) {
-            el = el || this.get('el')
-            if (!el.hasAttr('bx-template')) {
-                this.bxLoad(el)
-            }
-            else {
-                this.on('afterTemplateChange', this.bxBindScope, this)
-                this.on('afterDataChange', this.bxRender, this)
-
-                this.bxTemplate(el)
-            }
-        },
-
-        destructor: function() {
-            var children = this.bxChildren || []
-
-            for (var i = 0; i < children.length; i++) {
-                children[i].destroy()
-            }
-            this.bxParent = null
-            this.bxUndelegate()
-            this.get('el').remove()
-        },
-
-        bxBindScope: function() {
-            var el = this.get('el')
-            var scope = el.attr('bx-scope')
-            var data = this.bxParent.bxScope(scope)
-
-            this.set('data', data)
-        },
-
-        bxRender: function() {
-            var el = this.get('el')
-            var template = this.get('template')
-            var engine = app.config('templateEngine')
-            var data = {}
-            var res = null
-
-            data[this.bxName.split('/').pop()] = this.get('data')
-            if (engine && S.isFunction(engine.render)) {
-                res = engine.render(template, data)
-            }
-            else {
-                res = this.bxDirective(template, data)
-            }
-            el.html(res)
-
-            this.bxLoad(el)
-        }
-    })
-
-    return BxBase
-}, {
-    requires: [
-        'brix/core/bx-name',
-        'brix/core/bx-template',
-        'brix/core/bx-scope',
-        'brix/core/bx-directive',
-        'brix/core/app-config',
-        'rich-base'
-    ]
-});
-KISSY.add('brix/core/app-config', function(S) {
+KISSY.add('brix/app/config', function(S) {
 
     var exports = {
         configData: {
@@ -287,42 +178,183 @@ KISSY.add('brix/core/app-config', function(S) {
 
     return exports
 });
-KISSY.add('brix/core/bx-directive', function(S, bxIfElse, bxRepeat, XTemplate) {
+KISSY.add('brix/app/page', function(S, Base, bxName, bxScope) {
+
+    function BxPage(opts) {
+        BxPage.superclass.constructor.call(this, opts)
+    }
+
+    BxPage.ATTRS = {
+        data: null,
+
+        el: {
+            getter: function(elId) {
+                return elId && S.one(elId)
+            },
+            setter: function(el) {
+                if (el) {
+                    if (!el.attr('id')) {
+                        el.attr('id', 'bx-page' + S.guid())
+                    }
+                    return '#' + el.attr('id')
+                }
+            }
+        }
+    }
+
+    S.extend(BxPage, Base)
+    S.augment(BxPage, bxName, bxScope)
+
+    return BxPage
+}, {
+    requires: ['base', 'brix/core/bx-name', 'brix/core/bx-scope']
+});
+KISSY.add('brix/base', function(S, bxName, bxTemplate, bxScope, bxDirective, app, RichBase) {
+
+    function BxBase(opts) {
+        BxBase.superclass.constructor.call(this, opts)
+    }
+
+    BxBase.uid = function() {
+        return ['bx', S.guid()].join('-')
+    }
+
+    S.extend(BxBase, RichBase)
+
+    BxBase.ATTRS = {
+        data: null,
+
+        template: null,
+
+        el: {
+            getter: function(elId) {
+                return S.one(elId)
+            },
+            setter: function(el) {
+                if (!el.attr('id')) {
+                    el.attr('id', BxBase.uid())
+                }
+
+                return '#' + el.attr('id')
+            }
+        }
+    }
+
+    S.augment(BxBase, bxName, bxTemplate, bxScope, bxDirective, {
+        initialize: function(el) {
+            el = el || this.get('el')
+            if (!el.hasAttr('bx-template')) {
+                this.bxLoad(el)
+            }
+            else {
+                this.on('afterTemplateChange', this.bxBindScope, this)
+                this.on('afterDataChange', this.bxRender, this)
+
+                this.bxTemplate(el)
+            }
+        },
+
+        destructor: function() {
+            var children = this.bxChildren || []
+
+            for (var i = 0; i < children.length; i++) {
+                children[i].destroy()
+            }
+            this.bxParent = null
+            this.bxUndelegate()
+            this.get('el').remove()
+        },
+
+        bxBindScope: function() {
+            var el = this.get('el')
+            var scope = el.attr('bx-scope')
+            var data = this.bxParent.bxScope(scope)
+
+            this.set('data', data)
+        },
+
+        bxRender: function() {
+            var el = this.get('el')
+            var template = this.get('template')
+            var engine = app.config('templateEngine')
+            var data = {}
+            var res = null
+            var key = this.bxName.split('/').pop()
+
+            data[key] = this.get('data')
+            if (engine && S.isFunction(engine.render)) {
+                res = engine.render(template, data)
+            }
+            else {
+                res = this.bxDirective(template, data[key])
+            }
+            el.html(res)
+
+            this.bxLoad(el)
+        }
+    })
+
+    return BxBase
+}, {
+    requires: [
+        'brix/core/bx-name',
+        'brix/core/bx-template',
+        'brix/core/bx-scope',
+        'brix/core/bx-directive',
+        'brix/app/config',
+        'rich-base'
+    ]
+});
+KISSY.add('brix/core/bx-directive',
+          function(S, bxIfElse, bxEach, bxBoolean, bxSrc, XTemplate) {
 
     var exports = {
         bxDirective: function(template, data) {
-            var div = S.Node('<div>', {
-                html: template
+            var Node = S.Node
+            var div
+            var templateCache = this.get('templateCache')
+
+            if (!templateCache) {
+                div = Node('<div>', {
+                    html: template
+                })
+
+                this.bxIfElse(div)
+                this.bxEach(div)
+                this.bxBoolean(div)
+
+                template = this.bxUnsealOperators(div.html())
+                templateCache = new XTemplate(template)
+
+                this.set('templateCache', templateCache)
+            }
+            div = Node('<div>', {
+                html: templateCache.render(data)
             })
 
-            this.bxIfElse(div, data)
-            this.bxRepeat(div, data)
+            this.bxBooleanStrip(div)
+            this.bxSrcStrip(div)
 
-            return new XTemplate(div.html()).render(data)
+            return div.html()
         },
 
-        bxDirectSiblings: function(root, attr) {
-            var arr = []
-            var selectors = '[bx-name], [bx-if], [bx-else], [bx-repeat]'
-
-            root.all('[' + attr + ']').each(function(ele) {
-                if (!ele.parent(selectors)) {
-                    arr.push(ele)
-                }
-            })
-
-            return arr
+        bxDirectDirective: function(node, attr) {
+            return this.bxDirectChildren(node, '[' + attr + ']')
         }
     }
 
     S.mix(exports, bxIfElse)
-    S.mix(exports, bxRepeat)
+    S.mix(exports, bxEach)
+    S.mix(exports, bxBoolean)
+    S.mix(exports, bxSrc)
 
     return exports
 }, {
     requires: [
         'brix/directive/bx-if-else',
-        'brix/directive/bx-repeat',
+        'brix/directive/bx-each',
+        'brix/directive/bx-boolean',
+        'brix/directive/bx-src',
         'xtemplate',
         'node'
     ]
@@ -335,16 +367,11 @@ KISSY.add('brix/core/bx-name', function(S, Node) {
         // So let's use #bxLoad instead.
         bxLoad: function(root) {
             root = Node(root)
-            var nodes = this.bxChildElements(root)
+            var nodes = this.bxDirectChildren(root)
             var total = nodes.length
             var counter = 0
             var self = this
             var node
-
-            if (total === 0) {
-                this.fire('bx:ready')
-                return
-            }
 
             function check() {
                 counter++
@@ -354,10 +381,17 @@ KISSY.add('brix/core/bx-name', function(S, Node) {
                 }
             }
 
-            for (var i = 0; i < total; i++) {
-                node = Node(nodes[i])
+            if (total === 0) {
+                setTimeout(function() {
+                    self.fire('bx:ready')
+                }, 0)
+            }
+            else {
+                for (var i = 0; i < total; i++) {
+                    node = Node(nodes[i])
 
-                this.bxInstantiate(node, check)
+                    this.bxInstantiate(node, check)
+                }
             }
         },
 
@@ -393,11 +427,30 @@ KISSY.add('brix/core/bx-name', function(S, Node) {
             })
         },
 
-        bxChildElements: function(root) {
+        /**
+         * Get child elements of current node which may or may not have
+         * attribute bx-name.
+         *
+         * Given DOM structures like:
+         *
+         *     <div bx-name="foo/egg" bx-scope="cart">
+         *       <div bx-each="item in items"></div>
+         *       <div bx-name="foo/ham" bx-scope="item">
+         *         <div bx-each="attr in attributes"></div>
+         *       </div>
+         *     </div>
+         *
+         * this.bxDirectChildren(S.one('[bx-name="foo/egg"]'), '[bx-each]')
+         * should return an array consists of one element:
+         *
+         *     <div bx-each="item in items"></div>
+         */
+        bxDirectChildren: function(root, selector) {
             var arr = []
             var parentName = root.attr('bx-name')
 
-            root.all('[bx-name]').each(function(ele) {
+            selector = selector || '[bx-name]'
+            root.all(selector).each(function(ele) {
                 var parent = ele.parent('[bx-name]')
 
                 if (!parent || parent.attr('bx-name') === parentName) {
@@ -639,91 +692,155 @@ KISSY.add('brix/core/bx-template', function(S, app) {
     return exports
 }, {
     requires: [
-        'brix/core/app-config',
+        'brix/app/config',
         'node',
         'ajax',
         'sizzle'
     ]
 });
+KISSY.add('brix/directive/bx-boolean', function() {
+
+    var PROPS = ['bx-readonly', 'bx-disabled', 'bx-checked']
+
+    var BX_PREFIX = /^bx-/
+
+    var OPERATORS = [
+        ['>', 'gt', />/g, /\sbx-boolean-gt\s/g],
+        ['>=', 'gte', />=/g, /\sbx-boolean-gte\s/g],
+        ['<=', 'lte', /<=/g, /\sbx-boolean-lte\s/g],
+        ['<', 'lt', /</g, /\sbx-boolean-lt\s/g],
+        ['&&', 'and', /\&{2}/g, /\sbx-boolean-and\s/g],
+        ['||', 'or', /\|{2}/g, /\sbx-boolean-or\s/g]
+    ]
+
+    var OPERATOR_PREFIX = 'bx-boolean-'
+
+    var exports = {
+        bxBoolean: function(node) {
+            for (var i = 0; i < PROPS.length; i++) {
+                this.bxBooleanWrapEach(node, PROPS[i])
+            }
+        },
+
+        bxBooleanWrapEach: function(node, prop) {
+            var booleans = this.bxDirectDirective(node, prop)
+
+            for (var i = 0; i < booleans.length; i++) {
+                var bool = booleans[i]
+
+                bool.attr(prop, '{{#if ' + this.bxSealOperators(bool.attr(prop)) + '}}true{{/if}}')
+            }
+        },
+
+        bxBooleanStrip: function(node) {
+            for (var i = 0; i < PROPS.length; i++) {
+                this.bxBooleanStripEach(node, PROPS[i])
+            }
+        },
+
+        bxBooleanStripEach: function(node, prop) {
+            var naked = prop.replace(BX_PREFIX, '')
+            var booleans = this.bxDirectDirective(node, prop)
+
+            for (var i = 0; i < booleans.length; i++) {
+                var bool = booleans[i]
+
+                if (bool.attr(prop)) {
+                    bool.attr(naked, naked)
+                }
+            }
+        },
+
+        bxSealOperators: function(exp) {
+            for (var i = 0; i < OPERATORS.length; i++) {
+                var op = OPERATORS[i]
+
+                exp = exp.replace(op[2], OPERATOR_PREFIX + op[1])
+            }
+
+            return exp
+        },
+
+        bxUnsealOperators: function(template) {
+            for (var i = 0; i < OPERATORS.length; i++) {
+                var op = OPERATORS[i]
+
+                template = template.replace(op[3], ' ' + op[0] + ' ')
+            }
+
+            return template
+        }
+    }
+
+    return exports
+});
+KISSY.add('brix/directive/bx-each', function(S) {
+
+    var exports = {
+        bxEach: function(node) {
+            var eaches = this.bxDirectDirective(node, 'bx-each')
+            var DOM = S.DOM
+
+            for (var i = 0; i < eaches.length; i++) {
+                var r = eaches[i]
+                var k = r.attr('bx-each')
+                var startSymbole = document.createTextNode('{{#each ' + k + '}}')
+                var endSymbole = document.createTextNode('{{/each}}')
+
+                DOM.insertBefore(startSymbole, r)
+                DOM.insertAfter(endSymbole, r)
+            }
+        }
+    }
+
+    return exports
+});
 KISSY.add('brix/directive/bx-if-else', function(S) {
 
     var exports = {
-        bxIfElse: function(node, data) {
-            var NodeList = S.NodeList
-            var ifs = this.bxDirectSiblings(node, 'bx-if')
+        bxIfElse: function(node) {
+            var ifs = this.bxDirectDirective(node, 'bx-if')
+            var DOM = S.DOM
 
             for (var i = 0; i < ifs.length; i++) {
                 var positive = ifs[i]
                 var negative = positive.next()
 
-                console.log(negative.outerHTML(), negative.hasAttr('bx-else'))
                 if (negative && !negative.hasAttr('bx-else')) {
                     negative = null
                 }
-                var cond = positive.attr('bx-if')
+                var ifSymbole = document.createTextNode('{{#if ' + positive.attr('bx-if') + '}}')
+                var endSymbole = document.createTextNode('{{/if}}')
 
-                positive.removeAttr('bx-if')
-                if (data[cond]) {
-                    NodeList(this.bxDirective(positive.html(), data)).insertBefore(positive)
+                DOM.insertBefore(ifSymbole, positive)
+                if (negative) {
+                    var elseSymbole = document.createTextNode('{{else}}')
+
+                    DOM.insertBefore(elseSymbole, negative)
+                    DOM.insertAfter(endSymbole, negative)
                 }
                 else {
-                    if (negative) {
-                        negative.removeAttr('bx-else')
-                        NodeList(this.bxDirective(negative.html(), data)).insertBefore(negative)
-                    }
+                    DOM.insertAfter(endSymbole, positive)
                 }
-                if (negative) {
-                    negative.remove()
-                }
-                positive.remove()
             }
         }
     }
 
     return exports
-}, {
-    requires: [
-        'node'
-    ]
 });
-KISSY.add('brix/directive/bx-repeat', function(S) {
+KISSY.add('brix/directive/bx-src', function() {
 
     var exports = {
-        bxRepeat: function(node, data) {
-            var self = this
-            var NodeList = S.NodeList
-            var eles = this.bxDirectSiblings(node, 'bx-repeat')
+        bxSrcStrip: function(node) {
+            var srcs = this.bxDirectDirective(node, 'bx-attr')
 
-            for (var i = 0; i < eles.length; i++) {
-                var ele = eles[i]
-                var parts = ele.attr('bx-repeat').split(/\s+in\s+/)
-                var template = ele.removeAttr('bx-repeat').outerHTML()
+            for (var i = 0; i < srcs.length; i++) {
+                var src = srcs[i]
 
-                var keychain = parts[1].split('.')
-                var j
-                var list = data
-
-                for (j = 0; j < keychain.length; j++) {
-                    list = list[keychain[j]]
-                }
-
-                for (j = 0; j < list.length; j++) {
-                    var obj = {}
-
-                    obj[parts[0]] = list[j]
-                    var res = self.bxDirective(template, obj)
-
-                    NodeList(res).insertBefore(ele)
-                }
-
-                ele.remove()
+                src.attr('src', src.attr('bx-attr'))
             }
         }
     }
 
     return exports
-}, {
-    requires: [
-        'node'
-    ]
 });
