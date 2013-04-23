@@ -8,21 +8,21 @@ KISSY.config({
 })
 
 // mock a brick
-KISSY.add('shopping-ads/ceiling/index', function() {
+KISSY.add('ux.shopping-ads/ceiling/index', function() {
     // will call this constructor function like this:
     //
     //    new (function(ele) {})
     //
     return function(opts) {
-        equal(opts.el.attr('bx-name'), 'shopping-ads/ceiling')
+        equal(opts.el.attr('bx-name'), 'ux.shopping-ads/ceiling')
         start()
     }
 })
 
-KISSY.add('shopping-ads/footer/index', function(S, BxBase) {
+KISSY.add('ux.shopping-ads/footer/index', function(S, BxBase) {
     function Footer(opts) {
         Footer.superclass.constructor.call(this, opts)
-        equal(opts.el.attr('bx-name'), 'shopping-ads/footer')
+        equal(opts.el.attr('bx-name'), 'ux.shopping-ads/footer')
     }
 
     S.extend(Footer, BxBase)

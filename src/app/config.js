@@ -88,7 +88,7 @@ KISSY.add('brix/app/config', function(S) {
         },
 
         comboStyle: function() {
-            var imports = this.config('imports')
+            var imports = this.config('imports') || {}
             var styles = []
             var comp
             var ns
@@ -98,7 +98,7 @@ KISSY.add('brix/app/config', function(S) {
                     styles.push([ns, comp, 'index.css'].join('/'))
                 }
             }
-            var components = this.config('components')
+            var components = this.config('components') || []
 
             ns = this.config('namespace')
             for (var i = 0; i < components.length; i++) {

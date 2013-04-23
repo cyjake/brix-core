@@ -1,8 +1,8 @@
 KISSY.add('brix/directive/bx-if-else', function(S) {
 
     var exports = {
-        bxIfElse: function(node) {
-            var ifs = this.bxDirectDirective(node, 'bx-if')
+        bxIfElseWrap: function(node) {
+            var ifs = this.bxAllDirective(node, 'bx-if')
             var DOM = S.DOM
 
             for (var i = 0; i < ifs.length; i++) {
@@ -15,10 +15,12 @@ KISSY.add('brix/directive/bx-if-else', function(S) {
                 var ifSymbole = document.createTextNode('{{#if ' + positive.attr('bx-if') + '}}')
                 var endSymbole = document.createTextNode('{{/if}}')
 
+                positive.removeAttr('bx-if')
                 DOM.insertBefore(ifSymbole, positive)
                 if (negative) {
                     var elseSymbole = document.createTextNode('{{else}}')
 
+                    negative.removeAttr('bx-else')
                     DOM.insertBefore(elseSymbole, negative)
                     DOM.insertAfter(endSymbole, negative)
                 }

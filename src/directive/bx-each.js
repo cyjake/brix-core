@@ -1,8 +1,8 @@
 KISSY.add('brix/directive/bx-each', function(S) {
 
     var exports = {
-        bxEach: function(node) {
-            var eaches = this.bxDirectDirective(node, 'bx-each')
+        bxEachWrap: function(node) {
+            var eaches = this.bxAllDirective(node, 'bx-each')
             var DOM = S.DOM
 
             for (var i = 0; i < eaches.length; i++) {
@@ -13,6 +13,8 @@ KISSY.add('brix/directive/bx-each', function(S) {
 
                 DOM.insertBefore(startSymbole, r)
                 DOM.insertAfter(endSymbole, r)
+
+                r.removeAttr('bx-each')
             }
         }
     }

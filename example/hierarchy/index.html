@@ -1,0 +1,37 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>组件嵌套</title>
+  <link rel="stylesheet" type="text/css" href="../assets/brix.css">
+</head>
+<body bx-app>
+  <div bx-name="brix/breadcrumbs" bx-model="breadcrumbsData as entries">
+    <ul class="breadcrumbs">
+      <li bx-each="entries" class="item">
+        <a bx-if="text" href="{{value}}">{{text}}</a>
+        <div bx-else bx-name="brix/dropdown" data-mode="2" class="dropdown dropdown-arrow">
+          <span bx-select="selected in dropdown" class="dropdown-hd">
+            <a href="#"><span>计划：</span>
+              <span value="{{value}}" class="dropdown-text">{{text}}</span>
+            </a>
+            <i class="iconfont icon-arrow-down">&#459;</i>
+          </span>
+          <ul class="dropdown-list">
+            <li bx-each="dropdown" bx-class="dropdown-item-selected if selected" class="dropdown-item">
+              <span value="{{value}}">{{text}}</span>
+              <i class="iconfont icon-ok">&#126;</i>
+            </li>
+          </ul>
+        </div>
+        <!-- xtemplate 暂时不支持 ! 操作符 -->
+        <!-- <i bx-if="!last" class="iconfont">&#402;</i> -->
+        <i bx-if="first || middle" class="iconfont">&#402;</i>
+      </li>
+    </ul>
+  </div>
+  <script src="http://a.tbcdn.cn/s/kissy/1.3.0/seed.js"></script>
+  <script src="../../build/brix-0.1.0.js"></script>
+  <script src="hierarchy.js"></script>
+</body>
+</html>

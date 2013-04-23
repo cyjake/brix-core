@@ -1,4 +1,4 @@
-KISSY.add('brix/base', function(S, bxName, bxTemplate, bxScope, bxDirective, app, RichBase) {
+KISSY.add('brix/base', function(S, bxName, bxTemplate, bxModel, bxDirective, app, RichBase) {
 
     function BxBase(opts) {
         BxBase.superclass.constructor.call(this, opts)
@@ -29,14 +29,14 @@ KISSY.add('brix/base', function(S, bxName, bxTemplate, bxScope, bxDirective, app
         }
     }
 
-    S.augment(BxBase, bxName, bxTemplate, bxScope, bxDirective, {
+    S.augment(BxBase, bxName, bxTemplate, bxModel, bxDirective, {
         initialize: function(el) {
             el = el || this.get('el')
-            if (!el.hasAttr('bx-template')) {
+            if (!el.hasAttr('bx-model')) {
                 this.bxLoad(el)
             }
             else {
-                this.on('afterTemplateChange', this.bxBindScope, this)
+                this.on('afterTemplateChange', this.bxBindModel, this)
                 this.on('afterDataChange', this.bxRender, this)
 
                 this.bxTemplate(el)
@@ -54,10 +54,8 @@ KISSY.add('brix/base', function(S, bxName, bxTemplate, bxScope, bxDirective, app
             this.get('el').remove()
         },
 
-        bxBindScope: function() {
-            var el = this.get('el')
-            var scope = el.attr('bx-scope')
-            var data = this.bxParent.bxScope(scope)
+        bxBindModel: function() {
+            var data = this.bxModel(this.bxParent.get('data'))
 
             this.set('data', data)
         },
@@ -88,7 +86,7 @@ KISSY.add('brix/base', function(S, bxName, bxTemplate, bxScope, bxDirective, app
     requires: [
         'brix/core/bx-name',
         'brix/core/bx-template',
-        'brix/core/bx-scope',
+        'brix/core/bx-model',
         'brix/core/bx-directive',
         'brix/app/config',
         'rich-base'

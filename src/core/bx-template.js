@@ -4,12 +4,14 @@ KISSY.add('brix/core/bx-template', function(S, app) {
         bxTemplate: function(ele) {
             var source = ele.attr('bx-template')
 
+            if (!source && ele.attr('bx-model')) {
+                source = '.'
+            }
             if (!source) {
                 // 不需要在前端渲染模板
                 return
             }
-
-            if (source.charAt(0) === '#') {
+            else if (source.charAt(0) === '#') {
                 this.bxScriptTemplate(source)
             }
             else if (source === '.') {

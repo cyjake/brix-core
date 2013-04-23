@@ -1,4 +1,4 @@
-KISSY.add('brix/app/page', function(S, Base, bxName, bxScope) {
+KISSY.add('brix/app/page', function(S, Base, bxName, bxModel) {
 
     function BxPage(opts) {
         BxPage.superclass.constructor.call(this, opts)
@@ -23,9 +23,9 @@ KISSY.add('brix/app/page', function(S, Base, bxName, bxScope) {
     }
 
     S.extend(BxPage, Base)
-    S.augment(BxPage, bxName, bxScope)
+    S.augment(BxPage, bxName, bxModel)
 
     return BxPage
 }, {
-    requires: ['base', 'brix/core/bx-name', 'brix/core/bx-scope']
+    requires: ['base', 'brix/core/bx-name', 'brix/core/bx-model']
 })

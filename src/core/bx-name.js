@@ -72,9 +72,9 @@ KISSY.add('brix/core/bx-name', function(S, Node) {
          *
          * Given DOM structures like:
          *
-         *     <div bx-name="foo/egg" bx-scope="cart">
+         *     <div bx-name="foo/egg" bx-model="cart">
          *       <div bx-each="item in items"></div>
-         *       <div bx-name="foo/ham" bx-scope="item">
+         *       <div bx-name="foo/ham" bx-model="item">
          *         <div bx-each="attr in attributes"></div>
          *       </div>
          *     </div>
@@ -188,9 +188,11 @@ KISSY.add('brix/core/bx-name', function(S, Node) {
             }
         },
 
-        // use cases:
-        // - this.bxOptions(el)            // get options of current brick
-        // - this.bxOptions(el, MyBrick)   // get options of MyBrick
+        /* use cases:
+         *
+         *     this.bxOptions(el)            // get options of current brick
+         *     this.bxOptions(el, MyBrick)   // get options of MyBrick
+         */
         bxOptions: function(el, c) {
             c = c || this.constructor
             var optionList = []

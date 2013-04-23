@@ -14,13 +14,22 @@ KISSY.use('brix/app', function(S, app) {
             ceiling: '0.1.0'
         },
         'ux.tanx': {
-            dropdown: '0.1.5'
+            dropdown: '0.1.5',
+            message: '0.1.2'
         }
     })
 
-    asyncTest('#boot app', function() {
-        app.boot().on('bx:ready', function() {
+    asyncTest('#boot app basic', function() {
+        app.boot('#fixture1').on('bx:ready', function() {
             start()
+        })
+    })
+
+    asyncTest('#boot app with style', function() {
+        app.bootStyle(function() {
+            app.boot('#fixture2').on('bx:ready', function() {
+                start()
+            })
         })
     })
 })

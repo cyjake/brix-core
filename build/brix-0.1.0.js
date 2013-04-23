@@ -155,7 +155,7 @@ KISSY.add('brix/app/config', function(S) {
         },
 
         comboStyle: function() {
-            var imports = this.config('imports')
+            var imports = this.config('imports') || {}
             var styles = []
             var comp
             var ns
@@ -165,7 +165,7 @@ KISSY.add('brix/app/config', function(S) {
                     styles.push([ns, comp, 'index.css'].join('/'))
                 }
             }
-            var components = this.config('components')
+            var components = this.config('components') || []
 
             ns = this.config('namespace')
             for (var i = 0; i < components.length; i++) {
@@ -178,7 +178,7 @@ KISSY.add('brix/app/config', function(S) {
 
     return exports
 });
-KISSY.add('brix/app/page', function(S, Base, bxName, bxScope) {
+KISSY.add('brix/app/page', function(S, Base, bxName, bxModel) {
 
     function BxPage(opts) {
         BxPage.superclass.constructor.call(this, opts)
@@ -203,13 +203,13 @@ KISSY.add('brix/app/page', function(S, Base, bxName, bxScope) {
     }
 
     S.extend(BxPage, Base)
-    S.augment(BxPage, bxName, bxScope)
+    S.augment(BxPage, bxName, bxModel)
 
     return BxPage
 }, {
-    requires: ['base', 'brix/core/bx-name', 'brix/core/bx-scope']
+    requires: ['base', 'brix/core/bx-name', 'brix/core/bx-model']
 });
-KISSY.add('brix/base', function(S, bxName, bxTemplate, bxScope, bxDirective, app, RichBase) {
+KISSY.add('brix/base', function(S, bxName, bxTemplate, bxModel, bxDirective, app, RichBase) {
 
     function BxBase(opts) {
         BxBase.superclass.constructor.call(this, opts)
@@ -240,14 +240,14 @@ KISSY.add('brix/base', function(S, bxName, bxTemplate, bxScope, bxDirective, app
         }
     }
 
-    S.augment(BxBase, bxName, bxTemplate, bxScope, bxDirective, {
+    S.augment(BxBase, bxName, bxTemplate, bxModel, bxDirective, {
         initialize: function(el) {
             el = el || this.get('el')
-            if (!el.hasAttr('bx-template')) {
+            if (!el.hasAttr('bx-model')) {
                 this.bxLoad(el)
             }
             else {
-                this.on('afterTemplateChange', this.bxBindScope, this)
+                this.on('afterTemplateChange', this.bxBindModel, this)
                 this.on('afterDataChange', this.bxRender, this)
 
                 this.bxTemplate(el)
@@ -265,10 +265,8 @@ KISSY.add('brix/base', function(S, bxName, bxTemplate, bxScope, bxDirective, app
             this.get('el').remove()
         },
 
-        bxBindScope: function() {
-            var el = this.get('el')
-            var scope = el.attr('bx-scope')
-            var data = this.bxParent.bxScope(scope)
+        bxBindModel: function() {
+            var data = this.bxModel(this.bxParent.get('data'))
 
             this.set('data', data)
         },
@@ -299,14 +297,25 @@ KISSY.add('brix/base', function(S, bxName, bxTemplate, bxScope, bxDirective, app
     requires: [
         'brix/core/bx-name',
         'brix/core/bx-template',
-        'brix/core/bx-scope',
+        'brix/core/bx-model',
         'brix/core/bx-directive',
         'brix/app/config',
         'rich-base'
     ]
 });
 KISSY.add('brix/core/bx-directive',
-          function(S, bxIfElse, bxEach, bxBoolean, bxSrc, XTemplate) {
+          function(S, bxIfElse, bxEach, bxBoolean, bxSrc, bxSelect, bxClass, XTemplate) {
+
+    var OPERATORS = [
+        ['>', 'gt', />/g, /\sbx-operator-gt\s/g],
+        ['>=', 'gte', />=/g, /\sbx-operator-gte\s/g],
+        ['<=', 'lte', /<=/g, /\sbx-operator-lte\s/g],
+        ['<', 'lt', /</g, /\sbx-operator-lt\s/g],
+        ['&&', 'and', /\&{2}/g, /\sbx-operator-and\s/g],
+        ['||', 'or', /\|{2}/g, /\sbx-operator-or\s/g]
+    ]
+
+    var OPERATOR_PREFIX = 'bx-boolean-'
 
     var exports = {
         bxDirective: function(template, data) {
@@ -319,9 +328,11 @@ KISSY.add('brix/core/bx-directive',
                     html: template
                 })
 
-                this.bxIfElse(div)
-                this.bxEach(div)
-                this.bxBoolean(div)
+                this.bxIfElseWrap(div)
+                this.bxEachWrap(div)
+                this.bxBooleanWrap(div)
+                this.bxClassWrap(div)
+                this.bxSelectWrap(div)
 
                 template = this.bxUnsealOperators(div.html())
                 templateCache = new XTemplate(template)
@@ -334,12 +345,53 @@ KISSY.add('brix/core/bx-directive',
 
             this.bxBooleanStrip(div)
             this.bxSrcStrip(div)
+            this.bxClassStrip(div)
 
             return div.html()
         },
 
         bxDirectDirective: function(node, attr) {
             return this.bxDirectChildren(node, '[' + attr + ']')
+        },
+
+        /**
+         * For unification of directive nodes querying api.
+         * To select whether all of its child directives or just those which
+         * belong to current brick directly , it is a question.
+         *
+         * 全部指令节点都取到，预处理成 XTemplate 模板字符串，直接渲染；
+         * 还是只取当前组件的指令节点，下一层的交给下一层组件处理。这是个问题。
+         */
+        bxAllDirective: function(node, attr) {
+            var arr = []
+            var Node = S.Node
+
+            node.all('[' + attr + ']').each(function(ele, i) {
+                arr[i] = Node(ele)
+            })
+            node = null
+
+            return arr
+        },
+
+        bxSealOperators: function(exp) {
+            for (var i = 0; i < OPERATORS.length; i++) {
+                var op = OPERATORS[i]
+
+                exp = exp.replace(op[2], OPERATOR_PREFIX + op[1])
+            }
+
+            return exp
+        },
+
+        bxUnsealOperators: function(template) {
+            for (var i = 0; i < OPERATORS.length; i++) {
+                var op = OPERATORS[i]
+
+                template = template.replace(op[3], ' ' + op[0] + ' ')
+            }
+
+            return template
         }
     }
 
@@ -347,6 +399,8 @@ KISSY.add('brix/core/bx-directive',
     S.mix(exports, bxEach)
     S.mix(exports, bxBoolean)
     S.mix(exports, bxSrc)
+    S.mix(exports, bxClass)
+    S.mix(exports, bxSelect)
 
     return exports
 }, {
@@ -355,9 +409,49 @@ KISSY.add('brix/core/bx-directive',
         'brix/directive/bx-each',
         'brix/directive/bx-boolean',
         'brix/directive/bx-src',
+        'brix/directive/bx-select',
+        'brix/directive/bx-class',
         'xtemplate',
         'node'
     ]
+});
+KISSY.add('brix/core/bx-model', function(S) {
+
+    var EXP_PTN = /^\s*(\w+)(?:\s+as\s+(\w+))?\s*$/
+
+    var exports = {
+        bxModel: function(data) {
+            var exp = this.get('el').attr('bx-model')
+
+            if (!exp) {
+                return
+            }
+            var matches = exp.match(EXP_PTN)
+            var attr = matches[1]
+            var mappedAttr = matches[2]
+            var obj
+
+            if (data[attr]) {
+                obj = data[attr]
+            }
+            else if (S.isFunction(this[attr])) {
+                obj = (this[attr])()
+            }
+
+            if (mappedAttr) {
+                var wrap = {}
+
+                wrap[mappedAttr] = obj
+
+                return wrap
+            }
+            else {
+                return obj
+            }
+        }
+    }
+
+    return exports
 });
 KISSY.add('brix/core/bx-name', function(S, Node) {
 
@@ -433,9 +527,9 @@ KISSY.add('brix/core/bx-name', function(S, Node) {
          *
          * Given DOM structures like:
          *
-         *     <div bx-name="foo/egg" bx-scope="cart">
+         *     <div bx-name="foo/egg" bx-model="cart">
          *       <div bx-each="item in items"></div>
-         *       <div bx-name="foo/ham" bx-scope="item">
+         *       <div bx-name="foo/ham" bx-model="item">
          *         <div bx-each="attr in attributes"></div>
          *       </div>
          *     </div>
@@ -549,9 +643,11 @@ KISSY.add('brix/core/bx-name', function(S, Node) {
             }
         },
 
-        // use cases:
-        // - this.bxOptions(el)            // get options of current brick
-        // - this.bxOptions(el, MyBrick)   // get options of MyBrick
+        /* use cases:
+         *
+         *     this.bxOptions(el)            // get options of current brick
+         *     this.bxOptions(el, MyBrick)   // get options of MyBrick
+         */
         bxOptions: function(el, c) {
             c = c || this.constructor
             var optionList = []
@@ -599,35 +695,20 @@ KISSY.add('brix/core/bx-name', function(S, Node) {
         'event'
     ]
 });
-KISSY.add('brix/core/bx-scope', function(S) {
-
-    var exports = {
-        bxScope: function(attr) {
-            var data = this.get('data')
-
-            if (S.isFunction(this[attr])) {
-                return (this[attr])()
-            }
-            else if (data[attr]) {
-                return data[attr]
-            }
-        }
-    }
-
-    return exports
-});
 KISSY.add('brix/core/bx-template', function(S, app) {
 
     var exports = {
         bxTemplate: function(ele) {
             var source = ele.attr('bx-template')
 
+            if (!source && ele.attr('bx-model')) {
+                source = '.'
+            }
             if (!source) {
                 // 不需要在前端渲染模板
                 return
             }
-
-            if (source.charAt(0) === '#') {
+            else if (source.charAt(0) === '#') {
                 this.bxScriptTemplate(source)
             }
             else if (source === '.') {
@@ -704,19 +785,8 @@ KISSY.add('brix/directive/bx-boolean', function() {
 
     var BX_PREFIX = /^bx-/
 
-    var OPERATORS = [
-        ['>', 'gt', />/g, /\sbx-boolean-gt\s/g],
-        ['>=', 'gte', />=/g, /\sbx-boolean-gte\s/g],
-        ['<=', 'lte', /<=/g, /\sbx-boolean-lte\s/g],
-        ['<', 'lt', /</g, /\sbx-boolean-lt\s/g],
-        ['&&', 'and', /\&{2}/g, /\sbx-boolean-and\s/g],
-        ['||', 'or', /\|{2}/g, /\sbx-boolean-or\s/g]
-    ]
-
-    var OPERATOR_PREFIX = 'bx-boolean-'
-
     var exports = {
-        bxBoolean: function(node) {
+        bxBooleanWrap: function(node) {
             for (var i = 0; i < PROPS.length; i++) {
                 this.bxBooleanWrapEach(node, PROPS[i])
             }
@@ -749,26 +819,41 @@ KISSY.add('brix/directive/bx-boolean', function() {
                     bool.attr(naked, naked)
                 }
             }
+        }
+    }
+
+    return exports
+});
+KISSY.add('brix/directive/bx-class', function() {
+
+    var KLASS_PTN = /^\s*([\-_a-z0-9]+(?:\s+[\-_a-z0-9]+)*?)\s+if\s+([!\w]+)\s*$/i
+
+    var exports = {
+        bxClassWrap: function(node) {
+            var klasses = this.bxAllDirective(node, 'bx-class')
+
+            for (var i = 0; i < klasses.length; i++) {
+                var klass = klasses[i]
+                var matches = klass.attr('bx-class').match(KLASS_PTN)
+                var classList = matches[1]
+                var cond = matches[2]
+
+                klass.attr('bx-class', '{{#if ' + cond + '}}' + classList + '{{/if}}')
+            }
         },
 
-        bxSealOperators: function(exp) {
-            for (var i = 0; i < OPERATORS.length; i++) {
-                var op = OPERATORS[i]
+        bxClassStrip: function(node) {
+            var klasses = this.bxAllDirective(node, 'bx-class')
 
-                exp = exp.replace(op[2], OPERATOR_PREFIX + op[1])
+            for (var i = 0; i < klasses.length; i++) {
+                var klass = klasses[i]
+                var classList = klass.attr('bx-class')
+
+                if (classList) {
+                    klass.addClass(classList)
+                }
+                klass.removeAttr('bx-class')
             }
-
-            return exp
-        },
-
-        bxUnsealOperators: function(template) {
-            for (var i = 0; i < OPERATORS.length; i++) {
-                var op = OPERATORS[i]
-
-                template = template.replace(op[3], ' ' + op[0] + ' ')
-            }
-
-            return template
         }
     }
 
@@ -777,8 +862,8 @@ KISSY.add('brix/directive/bx-boolean', function() {
 KISSY.add('brix/directive/bx-each', function(S) {
 
     var exports = {
-        bxEach: function(node) {
-            var eaches = this.bxDirectDirective(node, 'bx-each')
+        bxEachWrap: function(node) {
+            var eaches = this.bxAllDirective(node, 'bx-each')
             var DOM = S.DOM
 
             for (var i = 0; i < eaches.length; i++) {
@@ -789,6 +874,8 @@ KISSY.add('brix/directive/bx-each', function(S) {
 
                 DOM.insertBefore(startSymbole, r)
                 DOM.insertAfter(endSymbole, r)
+
+                r.removeAttr('bx-each')
             }
         }
     }
@@ -798,8 +885,8 @@ KISSY.add('brix/directive/bx-each', function(S) {
 KISSY.add('brix/directive/bx-if-else', function(S) {
 
     var exports = {
-        bxIfElse: function(node) {
-            var ifs = this.bxDirectDirective(node, 'bx-if')
+        bxIfElseWrap: function(node) {
+            var ifs = this.bxAllDirective(node, 'bx-if')
             var DOM = S.DOM
 
             for (var i = 0; i < ifs.length; i++) {
@@ -812,10 +899,12 @@ KISSY.add('brix/directive/bx-if-else', function(S) {
                 var ifSymbole = document.createTextNode('{{#if ' + positive.attr('bx-if') + '}}')
                 var endSymbole = document.createTextNode('{{/if}}')
 
+                positive.removeAttr('bx-if')
                 DOM.insertBefore(ifSymbole, positive)
                 if (negative) {
                     var elseSymbole = document.createTextNode('{{else}}')
 
+                    negative.removeAttr('bx-else')
                     DOM.insertBefore(elseSymbole, negative)
                     DOM.insertAfter(endSymbole, negative)
                 }
@@ -828,16 +917,45 @@ KISSY.add('brix/directive/bx-if-else', function(S) {
 
     return exports
 });
+KISSY.add('brix/directive/bx-select', function(S) {
+
+    var QUERY_PTN = /^\s*(\w+)\s+in\s+(\w+)\s*$/
+
+    var exports = {
+        bxSelectWrap: function(node) {
+            var DOM = S.DOM
+            var doc = document
+            var selects = this.bxAllDirective(node, 'bx-select')
+
+            for (var i = 0; i < selects.length; i++) {
+                var sel = selects[i]
+                var matches = sel.attr('bx-select').match(QUERY_PTN)
+                var cond = matches[1]
+                var list = matches[2]
+
+                DOM.insertBefore(doc.createTextNode('{{#each ' + list + '}}'))
+                DOM.insertBefore(doc.createTextNode('{{#if ' + cond + '}}'))
+                DOM.insertAfter(doc.createTextNode('{{/if}}'))
+                DOM.insertAfter(doc.createTextNode('{{/each}}'))
+
+                sel.removeAttr('bx-select')
+            }
+        }
+    }
+
+    return exports
+});
 KISSY.add('brix/directive/bx-src', function() {
 
     var exports = {
         bxSrcStrip: function(node) {
-            var srcs = this.bxDirectDirective(node, 'bx-attr')
+            var srcs = this.bxAllDirective(node, 'bx-attr')
 
             for (var i = 0; i < srcs.length; i++) {
                 var src = srcs[i]
 
                 src.attr('src', src.attr('bx-attr'))
+                src.removeAttr('bx-attr')
             }
         }
     }

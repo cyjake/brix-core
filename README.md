@@ -194,10 +194,10 @@ package.json、index.css 先不管，index.js 即此组件的入口文件，它�
 左莫、崇志比较有发言权，这种边缘情况都是他们发现的。原有的 Brix 实现里，采用正则替换的方式，
 保存模板字符串，替换成可以安全解析的结构，处理完毕之后再替换回去。
 
-### bx-scope
+### bx-model
 
 ```html
-<div bx-name="tanx/dropdown" bx-template="." bx-scope="dropdownData as entries">
+<div bx-name="tanx/dropdown" bx-template="." bx-model="dropdownData as entries">
   <ul>
     <li bx-each="entry in entries">
       <label value="{{entry.value}}">{{entry.label}}</label>
@@ -205,6 +205,9 @@ package.json、index.css 先不管，index.js 即此组件的入口文件，它�
   </ul>
 </div>
 ```
+
+原先叫 bx-scope ，但这个名字用来实现完整意义的局部刷新会更贴切，组件层面，应该与它的数据模型相关，
+即 bx-model ，因此改了名字。
 
 ### bx-if
 
