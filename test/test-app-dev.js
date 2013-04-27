@@ -20,16 +20,12 @@ KISSY.use('brix/app', function(S, app) {
     })
 
     asyncTest('#boot app basic', function() {
-        app.boot('#fixture1').on('bx:ready', function() {
-            start()
-        })
+        app.boot('#fixture1').on('bx:ready', start)
     })
 
     asyncTest('#boot app with style', function() {
         app.bootStyle(function() {
-            app.boot('#fixture2').on('bx:ready', function() {
-                start()
-            })
+            app.boot('#fixture2').on('bx:ready', start)
         })
     })
 })

@@ -38,6 +38,10 @@ KISSY.add('brix/core/bx-name', function(S, Node) {
             var self = this
 
             S.use(el.attr('bx-name') + '/index', function(S, Brick) {
+                if (!S.isFunction(Brick)) {
+                    // no need to initialize anything.
+                    return
+                }
                 var opts = self.bxOptions(el, Brick)
                 var inst
 

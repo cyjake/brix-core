@@ -8,9 +8,11 @@ KISSY.add('brix/app/config', function(S) {
 
             imports: null,
 
-            stamp: null,
+            timestamp: null,
 
-            namespace: null
+            namespace: null,
+
+            components: null
         },
 
         config: function(prop, data) {
@@ -30,30 +32,49 @@ KISSY.add('brix/app/config', function(S) {
             }
         },
 
-        mapStamp: function() {
-            var stamp = this.config('stamp')
+        mapTimestamp: function() {
+            var stamp = this.config('timestamp')
             var ns = this.config('namespace')
 
-            function injectStamp(m, name, file) {
-                return [ns, stamp, name, file].join('/')
-            }
+            if (stamp && ns) {
+                var injectTimestamp = function(m, name, file) {
+                    return [ns, stamp, name, file].join('/')
+                }
 
-            S.config('map', [
-                [new RegExp(ns + '\\/([^\\/]+)\\/([^\\/]+)$'), injectStamp]
-            ])
+                S.config('map', [
+                    [new RegExp(ns + '\\/([^\\/]+)\\/([^\\/]+)$'), injectTimestamp]
+                ])
+            }
         },
 
         mapImports: function() {
-            var maps = []
-            var imports = this.config('imports')
+            this.mapModules(this.config('imports'))
+        },
 
+        mapComponents: function() {
+            var comps = this.config('components')
+
+            if (S.isPlainObject(comps)) {
+                var ns = this.config('namespace')
+                var obj = {}
+
+                obj[ns] = comps
+                this.mapModules(obj)
+            }
+            else {
+                this.mapTimestamp()
+            }
+        },
+
+        mapModules: function(lock) {
             function makeReplacer(ns) {
                 return function(match, name, file) {
-                    return [ns, name, imports[ns][name], file].join('/')
+                    return [ns, name, lock[ns][name], file].join('/')
                 }
             }
+            var maps = []
 
-            for (var ns in imports) {
+            for (var ns in lock) {
                 maps.push([new RegExp(ns + '\\/([^\\/]+)\\/([^\\/]+)$'), makeReplacer(ns)])
             }
 
@@ -100,6 +121,9 @@ KISSY.add('brix/app/config', function(S) {
             }
             var components = this.config('components') || []
 
+            if (S.isPlainObject(components)) {
+                components = S.keys(components)
+            }
             ns = this.config('namespace')
             for (var i = 0; i < components.length; i++) {
                 styles.push([ns, components[i], 'index.css'].join('/'))

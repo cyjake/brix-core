@@ -41,8 +41,8 @@ KISSY.add('brix/app', function(S, BxPage, appConfig) {
 
         prepareLoader: function() {
             if (!this.get('prepared')) {
-                this.mapStamp()
                 this.mapImports()
+                this.mapComponents()
                 this.packageImports()
                 this.packageComponents()
                 this.set('prepared', true)
