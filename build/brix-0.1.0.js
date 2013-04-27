@@ -445,7 +445,8 @@ KISSY.add('brix/core/bx-model', function(S) {
 
     var exports = {
         bxModel: function(data) {
-            var exp = this.get('el').attr('bx-model')
+            var el = this.get('el')
+            var exp = el.attr('bx-model')
 
             if (!exp) {
                 return
@@ -455,11 +456,23 @@ KISSY.add('brix/core/bx-model', function(S) {
             var mappedAttr = matches[2]
             var obj
 
-            if (data[attr]) {
-                obj = data[attr]
+            if (!attr) {
+                throw (new Error('bx-model attribute cannot be empty'))
             }
             else if (S.isFunction(this[attr])) {
                 obj = (this[attr])()
+            }
+            else {
+                var path = this.bxModelWithinEach(el)
+
+                if (path.length > 0) {
+                    var p
+
+                    while ((p = path.shift()) && p) {
+                        data = data[p]
+                    }
+                }
+                obj = data[attr]
             }
 
             if (mappedAttr) {
@@ -472,6 +485,33 @@ KISSY.add('brix/core/bx-model', function(S) {
             else {
                 return obj
             }
+        },
+
+        bxModelWithinEach: function(el) {
+            // When the @bx-model node is a child of one or many @bx-each nodes,
+            // the path shall be derived from those @bx-each nodes.
+            var path = []
+            var parentName = this.bxParent.bxName
+
+            if (!parentName) {
+                return path
+            }
+            var ele = el[0]
+            var parent
+
+            while ( parent !== ele.parentNode &&
+                    (parent = ele.parentNode) &&
+                    parent.getAttribute('bx-name') !== parentName) {
+                var each = parent.getAttribute('bx-each')
+                if (each) {
+                    var index = parent.getAttribute('bx-each-index')
+
+                    path.push(each)
+                    path.push(index)
+                }
+            }
+
+            return path
         }
     }
 
@@ -538,6 +578,7 @@ KISSY.add('brix/core/bx-name', function(S, Node) {
                 children.push(inst)
 
                 if (S.isFunction(inst.initialize)) {
+                    inst.bxCacheSubTemplets(el)
                     inst.on('bx:ready', fn)
                     inst.callMethodByHierarchy('initialize', 'constructor')
                     inst.bxDelegate(el)
@@ -547,6 +588,22 @@ KISSY.add('brix/core/bx-name', function(S, Node) {
                 }
                 el = null
             })
+        },
+
+        bxCacheSubTemplets: function(el) {
+            var nodes = this.bxDirectChildren(el)
+            var subTemplets = this.bxCachedSubTemplets = []
+
+            for (var i = 0; i < nodes.length; i++) {
+                var node = nodes[i]
+                var template = node.attr('bx-template')
+
+                if (node.attr('bx-model') && (!template || template === '.')) {
+                    subTemplets.push(node.html())
+                    node.html('')
+                    node.attr('bx-template', 'cached')
+                }
+            }
         },
 
         /**
@@ -729,6 +786,7 @@ KISSY.add('brix/core/bx-template', function(S, app) {
         bxTemplate: function(ele) {
             var source = ele.attr('bx-template')
 
+            console.log(source, ele.attr('bx-name'))
             if (!source && ele.attr('bx-model')) {
                 source = '.'
             }
@@ -744,6 +802,9 @@ KISSY.add('brix/core/bx-template', function(S, app) {
             }
             else if (/^\.\//.test(source)) {
                 this.bxRemoteTemplate(ele.attr('bx-name') + source.substr(1))
+            }
+            else if (source === 'cached') {
+                this.set('template', this.bxParent.bxCachedSubTemplets.shift())
             }
         },
 
@@ -897,14 +958,22 @@ KISSY.add('brix/directive/bx-each', function(S) {
             for (var i = 0; i < eaches.length; i++) {
                 var r = eaches[i]
                 var k = r.attr('bx-each')
+
+                this.bxEachMarkIndex(r, k)
+
                 var startSymbole = document.createTextNode('{{#each ' + k + '}}')
                 var endSymbole = document.createTextNode('{{/each}}')
 
                 DOM.insertBefore(startSymbole, r)
                 DOM.insertAfter(endSymbole, r)
 
-                r.removeAttr('bx-each')
+                // r.removeAttr('bx-each')
             }
+        },
+
+        bxEachMarkIndex: function(node) {
+            // utilize the xindex variable provided by XTemplate
+            node.attr('bx-each-index', '{{xindex}}')
         }
     }
 

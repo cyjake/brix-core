@@ -14,6 +14,9 @@ KISSY.use('brix/app', function(S, app) {
     app.config('imports', {
         'ux.shopping-ads': {
             ceiling: '0.1.0'
+        },
+        'ux.tanx': {
+            dropdown: '0.1.5'
         }
     })
 
@@ -82,6 +85,72 @@ KISSY.use('brix/app', function(S, app) {
             footer.destroy()
 
             equal(S.one('#fixture4').all('[bx-name="ux.demo/footer"]').length, 0)
+            start()
+        })
+    })
+
+    asyncTest('#bxCacheSubTemplets', function() {
+        app.boot('#fixture5', {
+            footerData: {
+                user: {
+                    email: 'ye.hao@me.com',
+                    name: '凌征'
+                },
+                options: [
+                    '临',
+                    '兵',
+                    '斗',
+                    '者'
+                ]
+            }
+        }).on('bx:ready', function() {
+            var footer = this.bxFind('ux.demo/footer')
+            var dropdown = footer.bxFind('ux.tanx/dropdown')
+
+            ok(footer)
+            ok(dropdown)
+
+            start()
+        })
+    })
+
+    asyncTest('#bxCacheSubTemplets complicated', function() {
+        app.boot('#fixture6', {
+            breadcrumbsData: [{
+                text: '首页',
+                value: '#1234'
+            }, {
+                options: [{
+                    value: 1,
+                    text: "计划列表"
+                }, {
+                    value: 2,
+                    text: "计划列表2"
+                }, {
+                    value: 3,
+                    text: "计划列表3"
+                }, {
+                    value: 4,
+                    text: "计划列表4"
+                }]
+            }, {
+                text: '创意管理',
+                value: '#44'
+            }, {
+                text: '创意活动五',
+                value: '#123'
+            }]
+        }).on('bx:ready', function() {
+            var crumbs = this.bxFind('ux.demo/breadcrumbs')
+            var dropdown = crumbs.bxFind('ux.tanx/dropdown')
+
+            ok(crumbs)
+            ok(dropdown)
+            deepEqual(dropdown.get('data').dropdown[3], {
+                value: 4,
+                text: '计划列表4'
+            })
+
             start()
         })
     })

@@ -26,6 +26,10 @@ KISSY.use('brix/app', function(S, app) {
                 }
             }
         }).on('bx:ready', function() {
+            var msg = this.bxFind('ux.tanx/message')
+
+            equal(S.trim(msg.get('el').text()), '最近风声紧，低调。')
+
             start()
         })
     })

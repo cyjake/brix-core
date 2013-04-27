@@ -22,6 +22,29 @@
   <div id="fixture4">
     <div bx-name="ux.demo/footer"></div>
   </div>
+  <div id="fixture5">
+    <div bx-name="ux.demo/footer" bx-model="footerData">
+      <h2><a href="mailto:{{user.email}}">{{user.name}}</a></h2>
+      <div bx-name="ux.tanx/dropdown" bx-model="options as dropdown">
+        <ol>
+          <li bx-each="dropdown">{{.}}</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+  <div id="fixture6">
+    <div bx-name="ux.demo/breadcrumbs" bx-model="breadcrumbsData as entries">
+      <ol>
+        <li bx-each="entries">
+          <span bx-if="text">{{text}}</span>
+          <span bx-else bx-name="ux.tanx/dropdown" bx-model="options as dropdown">
+            <ol>
+              <li bx-each="dropdown" data-value="{{value}}">{{text}}</li>
+            </ol>
+          </span>
+        </li>
+    </div>
+  </div>
   <script src="qunit.js"></script>
   <script src="http://a.tbcdn.cn/s/kissy/1.3.0/seed.js"></script>
   <script src="test-base.js"></script>

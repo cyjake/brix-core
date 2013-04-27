@@ -5,7 +5,7 @@ KISSY.use('brix/app', function(S, app) {
             value: '#1234',
             first: true
         }, {
-            dropdown: [{
+            options: [{
                 value: 1,
                 text: "计划列表",
                 selected: true

@@ -59,6 +59,7 @@ KISSY.add('brix/core/bx-name', function(S, Node) {
                 children.push(inst)
 
                 if (S.isFunction(inst.initialize)) {
+                    inst.bxCacheSubTemplets(el)
                     inst.on('bx:ready', fn)
                     inst.callMethodByHierarchy('initialize', 'constructor')
                     inst.bxDelegate(el)
@@ -68,6 +69,22 @@ KISSY.add('brix/core/bx-name', function(S, Node) {
                 }
                 el = null
             })
+        },
+
+        bxCacheSubTemplets: function(el) {
+            var nodes = this.bxDirectChildren(el)
+            var subTemplets = this.bxCachedSubTemplets = []
+
+            for (var i = 0; i < nodes.length; i++) {
+                var node = nodes[i]
+                var template = node.attr('bx-template')
+
+                if (node.attr('bx-model') && (!template || template === '.')) {
+                    subTemplets.push(node.html())
+                    node.html('')
+                    node.attr('bx-template', 'cached')
+                }
+            }
         },
 
         /**

@@ -12,7 +12,8 @@ KISSY.add('brix/directive/bx-if-else', function(S) {
                 if (negative && !negative.hasAttr('bx-else')) {
                     negative = null
                 }
-                var ifSymbole = document.createTextNode('{{#if ' + positive.attr('bx-if') + '}}')
+                var cond = this.bxSealOperators(positive.attr('bx-if'))
+                var ifSymbole = document.createTextNode('{{#if ' + cond + '}}')
                 var endSymbole = document.createTextNode('{{/if}}')
 
                 positive.removeAttr('bx-if')

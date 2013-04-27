@@ -10,7 +10,7 @@
     <ul class="breadcrumbs">
       <li bx-each="entries" class="item">
         <a bx-if="text" href="{{value}}">{{text}}</a>
-        <div bx-else bx-name="brix/dropdown" data-mode="2" class="dropdown dropdown-arrow">
+        <div bx-else bx-name="brix/dropdown" bx-model="options as dropdown" data-mode="2" class="dropdown dropdown-arrow">
           <span bx-select="selected in dropdown" class="dropdown-hd">
             <a href="#"><span>计划：</span>
               <span value="{{value}}" class="dropdown-text">{{text}}</span>
@@ -26,7 +26,7 @@
         </div>
         <!-- xtemplate 暂时不支持 ! 操作符 -->
         <!-- <i bx-if="!last" class="iconfont">&#402;</i> -->
-        <i bx-if="first || middle" class="iconfont">&#402;</i>
+        <i bx-if="xindex !== xcount - 1" class="iconfont">&#402;</i>
       </li>
     </ul>
   </div>

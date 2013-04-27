@@ -4,6 +4,7 @@ KISSY.add('brix/core/bx-template', function(S, app) {
         bxTemplate: function(ele) {
             var source = ele.attr('bx-template')
 
+            console.log(source, ele.attr('bx-name'))
             if (!source && ele.attr('bx-model')) {
                 source = '.'
             }
@@ -19,6 +20,9 @@ KISSY.add('brix/core/bx-template', function(S, app) {
             }
             else if (/^\.\//.test(source)) {
                 this.bxRemoteTemplate(ele.attr('bx-name') + source.substr(1))
+            }
+            else if (source === 'cached') {
+                this.set('template', this.bxParent.bxCachedSubTemplets.shift())
             }
         },
 

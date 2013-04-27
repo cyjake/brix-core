@@ -6,8 +6,7 @@ KISSY.add('brix/core/bx-directive',
         ['>=', 'gte', />=/g, /\sbx-operator-gte\s/g],
         ['<=', 'lte', /<=/g, /\sbx-operator-lte\s/g],
         ['<', 'lt', /</g, /\sbx-operator-lt\s/g],
-        ['&&', 'and', /\&{2}/g, /\sbx-operator-and\s/g],
-        ['||', 'or', /\|{2}/g, /\sbx-operator-or\s/g]
+        ['&&', 'and', /\&{2}/g, /\sbx-operator-and\s/g]
     ]
 
     var OPERATOR_PREFIX = 'bx-boolean-'
