@@ -1,4 +1,4 @@
-# Brix Core
+# Brix Core [![Build Status](https://travis-ci.org/dotnil/brix-core.png?branch=master)](https://travis-ci.org/dotnil/brix-core)
 
 Brix 的核心功能，包括：
 
