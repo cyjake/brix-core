@@ -25,6 +25,7 @@
     "grunt-contrib-concat": "~0.2.0"
   },
   "scripts": {
-    "start": "grunt connect:server:keepalive"
+    "start": "grunt connect:server:keepalive",
+    "test": "grunt test --verbose"
   }
 }
