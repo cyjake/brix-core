@@ -1,0 +1,28 @@
+<!docytpe html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>@bx-directive</title>
+  <link rel="stylesheet" type="text/css" href="../qunit.css">
+  <style type="text/css">.hidden { display: none; }</style>
+</head>
+<body>
+  <div id="qunit"></div>
+  <div id="qunit-fixture"></div>
+  <div id="fixture1" bx-app>
+    <div bx-name="ux.tanx/message" bx-model="messageData">
+      <div bx-class="hidden if error" class="success">
+        <p>没有消息就是好消息。</p>
+      </div>
+      <div>
+        <div bx-if="error">
+          <p>{{error.message}}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="../qunit.js"></script>
+  <script src="http://a.tbcdn.cn/s/kissy/1.3.0/seed.js"></script>
+  <script src="test-bx-directive.js"></script>
+</body>
+</html>

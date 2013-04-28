@@ -4,7 +4,6 @@ KISSY.add('brix/core/bx-template', function(S, app) {
         bxTemplate: function(ele) {
             var source = ele.attr('bx-template')
 
-            console.log(source, ele.attr('bx-name'))
             if (!source && ele.attr('bx-model')) {
                 source = '.'
             }
