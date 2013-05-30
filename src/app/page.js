@@ -14,7 +14,7 @@ KISSY.add('brix/app/page', function(S, Base, bxName, bxModel) {
             setter: function(el) {
                 if (el) {
                     if (!el.attr('id')) {
-                        el.attr('id', 'bx-page' + S.guid())
+                        el.attr('id', 'bx-page-' + S.guid())
                     }
                     return '#' + el.attr('id')
                 }

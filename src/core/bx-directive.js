@@ -29,6 +29,7 @@ KISSY.add('brix/core/bx-directive',
                 this.bxSelectWrap(div)
 
                 template = this.bxUnsealOperators(div.html())
+
                 templateCache = new XTemplate(template)
 
                 // The template derived from brix directives in the format of xtemplate
@@ -46,6 +47,21 @@ KISSY.add('brix/core/bx-directive',
             this.bxClassStrip(div)
 
             return div.html()
+        },
+
+        bxDirectivePartial: function(template, data) {
+            var Node = S.Node
+            var div = Node('<div>', { html: template })
+
+            this.bxIfElseWrap(div)
+            this.bxEachWrap(div)
+            this.bxBooleanWrap(div)
+            this.bxClassWrap(div)
+            this.bxSelectWrap(div)
+
+            template = this.bxUnsealOperators(div.html())
+
+            return (new XTemplate(template)).render(data)
         },
 
         bxDirectDirective: function(node, attr) {

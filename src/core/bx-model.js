@@ -25,6 +25,9 @@ KISSY.add('brix/core/bx-model', function(S) {
                 var path = this.bxModelWithinEach(el)
 
                 if (path.length > 0) {
+                    if (path[0] === this.bxParent.bxDataKey) {
+                        path.shift()
+                    }
                     var p
 
                     while ((p = path.shift()) && p) {
@@ -34,16 +37,9 @@ KISSY.add('brix/core/bx-model', function(S) {
                 obj = data[attr]
             }
 
-            if (mappedAttr) {
-                var wrap = {}
+            this.bxDataKey = mappedAttr || attr
 
-                wrap[mappedAttr] = obj
-
-                return wrap
-            }
-            else {
-                return obj
-            }
+            return obj
         },
 
         bxModelWithinEach: function(el) {
@@ -56,17 +52,20 @@ KISSY.add('brix/core/bx-model', function(S) {
                 return path
             }
             var ele = el[0]
-            var parent
+            var parent = ele
 
-            while ( parent !== ele.parentNode &&
-                    (parent = ele.parentNode) &&
-                    parent.getAttribute('bx-name') !== parentName) {
+            while ((parent = parent.parentNode) &&
+                    parent !== parent.parentNode) {
                 var each = parent.getAttribute('bx-each')
+
                 if (each) {
                     var index = parent.getAttribute('bx-each-index')
 
                     path.push(each)
                     path.push(index)
+                }
+                else if (parent.getAttribute('bx-name')) {
+                    break
                 }
             }
 

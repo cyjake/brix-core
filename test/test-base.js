@@ -30,7 +30,7 @@ KISSY.use('brix/app', function(S, app) {
             }
         }
 
-        app.boot('#fixture1', data1).on('bx:ready', function() {
+        app.boot('#fixture-1-boot-imports', data1).on('bx:ready', function() {
             var ele = S.one('[bx-name="ux.shopping-ads/ceiling"]')
 
             equal(ele.one('a').attr('href'), 'mailto:zuomo.xb@taobao.com')
@@ -53,7 +53,7 @@ KISSY.use('brix/app', function(S, app) {
                 }
             }
 
-            app.boot('#fixture2', data2).on('bx:ready', function() {
+            app.boot('#fixture-2-boot-components', data2).on('bx:ready', function() {
                 var el = S.one('[bx-name="brix-test/footer"]')
 
                 equal(el.all('h2').length, 1)
@@ -64,7 +64,7 @@ KISSY.use('brix/app', function(S, app) {
     }
 
     asyncTest('#bxOptions', function() {
-        app.boot('#fixture3').on('bx:ready', function() {
+        app.boot('#fixture-3-bx-options').on('bx:ready', function() {
             var footer = this.bxFind('ux.demo/footer')
 
             equal(footer.get('foo'), 1)
@@ -76,21 +76,21 @@ KISSY.use('brix/app', function(S, app) {
     })
 
     asyncTest('#destroy', function() {
-        app.boot('#fixture4').on('bx:ready', function() {
+        app.boot('#fixture-4-destroy').on('bx:ready', function() {
             var footer = this.bxFind('ux.demo/footer')
 
             ok(footer)
-            equal(S.one('#fixture4').one('[bx-name="ux.demo/footer"]').length, 1)
+            equal(this.get('el').one('[bx-name="ux.demo/footer"]').length, 1)
 
             footer.destroy()
 
-            equal(S.one('#fixture4').all('[bx-name="ux.demo/footer"]').length, 0)
+            equal(this.get('el').all('[bx-name="ux.demo/footer"]').length, 0)
             start()
         })
     })
 
     asyncTest('#bxCacheSubTemplets', function() {
-        app.boot('#fixture5', {
+        app.boot('#fixture-5-cache-sub-templets', {
             footerData: {
                 user: {
                     email: 'ye.hao@me.com',
@@ -115,7 +115,7 @@ KISSY.use('brix/app', function(S, app) {
     })
 
     asyncTest('#bxCacheSubTemplets complicated', function() {
-        app.boot('#fixture6', {
+        app.boot('#fixture-6-cache-sub-templets-complicated', {
             breadcrumbsData: [{
                 text: '首页',
                 value: '#1234'
@@ -146,10 +146,31 @@ KISSY.use('brix/app', function(S, app) {
 
             ok(crumbs)
             ok(dropdown)
-            deepEqual(dropdown.get('data').dropdown[3], {
+            deepEqual(dropdown.get('data')[3], {
                 value: 4,
                 text: '计划列表4'
             })
+
+            start()
+        })
+    })
+
+    asyncTest('#bxWatch', function() {
+        app.boot('#fixture-7-watch', {
+            footerData: {
+                year: 2012,
+                businessGroups: ['alibaba', 'etao', 'alimama', 'taobao', 'tmall']
+            }
+        }).on('bx:ready', function() {
+            var footer = this.bxFind('ux.demo/footer')
+            var year = footer.get('el').one('[bx-watch="footer.year"]')
+
+            equal(year.text(), '© 2012')
+
+            footer.bxChange('footer.year', 2013)
+            footer.bxChange('footer.businessGroups', ['alibaba', 'alimama', 'taobao', 'tmall'])
+
+            equal(year.text(), '© 2013')
 
             start()
         })

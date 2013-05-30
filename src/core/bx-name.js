@@ -2,7 +2,7 @@ KISSY.add('brix/core/bx-name', function(S, Node) {
 
     var exports = {
         // #bxName is occupied as the name of current instance of component.
-        // It is for the bricks tree structure.
+        // It is used for maintaining the bricks tree structure.
         // So let's use #bxLoad instead.
         bxLoad: function(root) {
             root = Node(root)
@@ -60,6 +60,7 @@ KISSY.add('brix/core/bx-name', function(S, Node) {
 
                 if (S.isFunction(inst.initialize)) {
                     inst.bxCacheSubTemplets(el)
+                    inst.bxWatch(el)
                     inst.on('bx:ready', fn)
                     inst.callMethodByHierarchy('initialize', 'constructor')
                     inst.bxDelegate(el)

@@ -32,6 +32,7 @@ KISSY.use('brix/app', function(S, app) {
     }
 
     app.config({
+        base: '../',
         namespace: 'ux.demo',
         imports: {
             brix: {

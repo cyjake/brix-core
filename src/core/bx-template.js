@@ -1,10 +1,10 @@
 KISSY.add('brix/core/bx-template', function(S, app) {
 
     var exports = {
-        bxTemplate: function(ele) {
-            var source = ele.attr('bx-template')
+        bxTemplate: function(el) {
+            var source = el.attr('bx-template')
 
-            if (!source && ele.attr('bx-model')) {
+            if (!source && el.attr('bx-model')) {
                 source = '.'
             }
             if (!source) {
@@ -15,13 +15,30 @@ KISSY.add('brix/core/bx-template', function(S, app) {
                 this.bxScriptTemplate(source)
             }
             else if (source === '.') {
-                this.bxHereTemplate(ele)
+                this.bxHereTemplate(el)
             }
             else if (/^\.\//.test(source)) {
-                this.bxRemoteTemplate(ele.attr('bx-name') + source.substr(1))
+                this.bxRemoteTemplate(el.attr('bx-name') + source.substr(1))
             }
             else if (source === 'cached') {
-                this.set('template', this.bxParent.bxCachedSubTemplets.shift())
+                var withinEach = false
+                var parent = el
+
+                /*jshint boss:true*/
+                while ((parent = parent.parent()) && parent !== el) {
+                    if (parent.attr('bx-each')) {
+                        withinEach = true
+                        break
+                    }
+                    // if found parent with [bx-name] first, then this brick is
+                    // not within each.
+                    else if (parent.attr('bx-name')) {
+                        break
+                    }
+                }
+                var subTemplets = this.bxParent.bxCachedSubTemplets
+
+                this.set('template', withinEach ? subTemplets[0] : subTemplets.shift())
             }
         },
 

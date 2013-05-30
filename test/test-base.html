@@ -8,21 +8,21 @@
 <body>
   <div id="qunit"></div>
   <div id="qunit-fixture"></div>
-  <div id="fixture1">
+  <div id="fixture-1-boot-imports">
     <div bx-name="ux.shopping-ads/ceiling" bx-model="ceiling">
-      <h1><a href="mailto:{{user.email}}">{{user.name}}</a></h1>
+      <h1><a href="mailto:{{ceiling.user.email}}">{{ceiling.user.name}}</a></h1>
     </div>
   </div>
-  <div id="fixture2">
+  <div id="fixture-2-boot-components">
     <div bx-name="ux.demo/footer" bx-template="./template" bx-model="footer"></div>
   </div>
-  <div id="fixture3">
+  <div id="fixture-3-bx-options">
     <div bx-name="ux.demo/footer" data-foo="1" data-bar="true" data-ham="egg"></div>
   </div>
-  <div id="fixture4">
+  <div id="fixture-4-destroy">
     <div bx-name="ux.demo/footer"></div>
   </div>
-  <div id="fixture5">
+  <div id="fixture-5-cache-sub-templets">
     <div bx-name="ux.demo/footer" bx-model="footerData">
       <h2><a href="mailto:{{user.email}}">{{user.name}}</a></h2>
       <div bx-name="ux.tanx/dropdown" bx-model="options as dropdown">
@@ -32,7 +32,7 @@
       </div>
     </div>
   </div>
-  <div id="fixture6">
+  <div id="fixture-6-cache-sub-templets-complicated">
     <div bx-name="ux.demo/breadcrumbs" bx-model="breadcrumbsData as entries">
       <ol>
         <li bx-each="entries">
@@ -43,6 +43,15 @@
             </ol>
           </span>
         </li>
+      </ol>
+    </div>
+  </div>
+  <div id="fixture-7-watch">
+    <div bx-name="ux.demo/footer" bx-model="footerData as footer">
+      <p bx-watch="footer.year">&copy; {{footer.year}}</p>
+      <ol>
+        <li bx-each="footer.businessGroups">{{.}}</li>
+      </ol>
     </div>
   </div>
   <script src="qunit.js"></script>

@@ -14,10 +14,11 @@ KISSY.add('brix/directive/bx-select', function(S) {
                 var cond = matches[1]
                 var list = matches[2]
 
-                DOM.insertBefore(doc.createTextNode('{{#each ' + list + '}}'))
-                DOM.insertBefore(doc.createTextNode('{{#if ' + cond + '}}'))
-                DOM.insertAfter(doc.createTextNode('{{/if}}'))
-                DOM.insertAfter(doc.createTextNode('{{/each}}'))
+                DOM.insertBefore(doc.createTextNode('{{#each ' + list + '}}'), sel)
+                DOM.insertAfter(doc.createTextNode('{{/each}}'), sel)
+
+                DOM.insertBefore(doc.createTextNode('{{#if ' + cond + '}}'), sel)
+                DOM.insertAfter(doc.createTextNode('{{/if}}'), sel)
 
                 sel.removeAttr('bx-select')
             }

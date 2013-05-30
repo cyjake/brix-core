@@ -90,9 +90,7 @@ KISSY.use('brix/app', function(S, app) {
         namespace: 'ux.demo'
     })
     app.boot({
-        gridData: {
-            employees: selectEmployees()
-        },
+        employeesData: selectEmployees(),
         panelData: {
             page: pageNum,
             pages: totalPages
@@ -109,9 +107,7 @@ KISSY.use('brix/app', function(S, app) {
         panel.on('panel:previous', function() {
             pageNum -= 1
             pageNum = pageNum >= 0 ? pageNum : totalPages - 1
-            grid.set('data', {
-                employees: selectEmployees()
-            })
+            grid.bxChange('entries', selectEmployees())
             panel.set('data', {
                 page: pageNum,
                 pages: totalPages
@@ -120,9 +116,7 @@ KISSY.use('brix/app', function(S, app) {
         panel.on('panel:next', function() {
             pageNum += 1
             pageNum = pageNum === totalPages ? 0 : pageNum
-            grid.set('data', {
-                employees: selectEmployees
-            })
+            grid.bxChange('entries', selectEmployees())
             panel.set('data', {
                 page: pageNum,
                 pages: totalPages

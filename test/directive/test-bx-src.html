@@ -1,0 +1,20 @@
+<!docytpe html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>@bx-class</title>
+  <link rel="stylesheet" type="text/css" href="../qunit.css">
+</head>
+<body>
+  <div id="qunit"></div>
+  <div id="qunit-fixture"></div>
+  <div id="fixture1" bx-app>
+    <div bx-name="ux.shopping-ads/ceiling" bx-model="ceilingData as ceiling">
+      <img bx-src="{{ceiling.logo}}"/>
+    </div>
+  </div>
+  <script src="../qunit.js"></script>
+  <script src="http://a.tbcdn.cn/s/kissy/1.3.0/seed.js"></script>
+  <script src="test-bx-src.js"></script>
+</body>
+</html>

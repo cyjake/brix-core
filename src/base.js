@@ -1,4 +1,4 @@
-KISSY.add('brix/base', function(S, bxName, bxTemplate, bxModel, bxDirective, app, RichBase) {
+KISSY.add('brix/base', function(S, bxName, bxTemplate, bxModel, bxDirective, bxWatch, app, RichBase) {
 
     function BxBase(opts) {
         BxBase.superclass.constructor.call(this, opts)
@@ -29,7 +29,7 @@ KISSY.add('brix/base', function(S, bxName, bxTemplate, bxModel, bxDirective, app
         }
     }
 
-    S.augment(BxBase, bxName, bxTemplate, bxModel, bxDirective, {
+    S.augment(BxBase, bxName, bxTemplate, bxModel, bxDirective, bxWatch, {
         initialize: function(el) {
             el = el || this.get('el')
             if (!el.hasAttr('bx-model')) {
@@ -64,16 +64,15 @@ KISSY.add('brix/base', function(S, bxName, bxTemplate, bxModel, bxDirective, app
             var el = this.get('el')
             var template = this.get('template')
             var engine = app.config('templateEngine')
-            var data = {}
             var res = null
-            var key = this.bxName.split('/').pop()
+            var data = {}
 
-            data[key] = this.get('data')
+            data[this.bxDataKey] = this.get('data')
             if (engine && S.isFunction(engine.render)) {
                 res = engine.render(template, data)
             }
             else {
-                res = this.bxDirective(template, data[key])
+                res = this.bxDirective(template, data)
             }
             el.html(res)
 
@@ -88,6 +87,7 @@ KISSY.add('brix/base', function(S, bxName, bxTemplate, bxModel, bxDirective, app
         'brix/core/bx-template',
         'brix/core/bx-model',
         'brix/core/bx-directive',
+        'brix/core/bx-watch',
         'brix/app/config',
         'rich-base'
     ]
